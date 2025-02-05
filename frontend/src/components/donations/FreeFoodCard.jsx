@@ -2,6 +2,7 @@ import React from 'react';
 import { formatFullAddress } from '../../utils/locationUtils';
 import { toast } from 'react-toastify';
 import apiClient from '../../config/apiConfig';
+import { defaultVenue } from '../../assets';
 
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true }) => {
   const formatDate = (date) => {
@@ -56,12 +57,12 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   };
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/default-venue.jpg';
+    if (!imagePath) return defaultVenue;
     return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
   };
 
   const handleImageError = (e) => {
-    e.target.src = '/images/default-venue.jpg';
+    e.target.src = defaultVenue;
   };
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import apiClient from '../../config/apiConfig';
+import { defaultVenue } from '../../assets';
 
 const FreeFoodForm = () => {
   const { id } = useParams();
@@ -163,7 +164,7 @@ const FreeFoodForm = () => {
   };
 
   const handleImageError = (e) => {
-    e.target.src = '/images/default-venue.jpg';
+    e.target.src = defaultVenue;
   };
 
   const handleSubmit = async (e) => {

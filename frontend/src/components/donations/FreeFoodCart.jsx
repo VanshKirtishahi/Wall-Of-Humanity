@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import FreeFoodCard from './FreeFoodCard';
-import api from '../../config/axios';
+import apiClient from '../../config/apiConfig';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 
@@ -21,7 +21,7 @@ const FreeFoodCart = () => {
   const fetchFreeFoodListings = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/api/free-food');
+      const response = await apiClient.get('/api/free-food');
       if (Array.isArray(response.data)) {
         setFreeFoodListings(response.data);
         // Extract unique locations, filter out null/undefined values

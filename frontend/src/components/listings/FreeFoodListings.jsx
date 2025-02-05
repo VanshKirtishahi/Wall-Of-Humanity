@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../config/axios';
+import apiClient from '../../config/apiConfig';
 import FreeFoodCard from '../donations/FreeFoodCard';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -20,7 +20,7 @@ const FreeFoodListings = () => {
   const fetchListings = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/api/free-food');
+      const response = await apiClient.get('/api/free-food');
       if (Array.isArray(response.data)) {
         const userListings = response.data.filter(listing => listing.uploadedBy === user?._id);
         setListings(userListings);
@@ -54,7 +54,7 @@ const FreeFoodListings = () => {
 
     if (window.confirm('Are you sure you want to delete this listing?')) {
       try {
-        await api.delete(`/api/free-food/${id}`);
+        await apiClient.delete(`/api/free-food/${id}`);
         setListings(prevListings => prevListings.filter(listing => listing._id !== id));
         toast.success('Listing deleted successfully');
       } catch (error) {

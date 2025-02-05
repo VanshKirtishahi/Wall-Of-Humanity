@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from 'react-icons/fa';
+import apiClient from '../../config/apiConfig';
 
 const Login = () => {
   const location = useLocation();

@@ -1,5 +1,7 @@
 import api from './api';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 class DonationService {
   async getAllDonations() {
     try {
@@ -88,7 +90,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/donations', {
+      const response = await fetch(`${API_URL}/api/donations`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`

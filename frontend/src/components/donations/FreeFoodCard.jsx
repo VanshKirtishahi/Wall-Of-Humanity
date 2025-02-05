@@ -56,7 +56,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/default-venue.jpg';
-    return `http://localhost:5000/uploads/free-food/${imagePath}`;
+    return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
   };
 
   return (

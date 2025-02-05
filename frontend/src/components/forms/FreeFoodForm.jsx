@@ -151,20 +151,21 @@ const FreeFoodForm = () => {
     }
   };
 
+  const handleImageError = (e) => {
+    e.target.src = defaultVenue;
+    toast.error('Failed to load image preview');
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, venueImage: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setFormData(prev => ({...prev, venueImage: file}));
+      setImagePreview(URL.createObjectURL(file));
     }
-  };
-
-  const handleImageError = (e) => {
-    e.target.src = defaultVenue;
   };
 
   const handleSubmit = async (e) => {

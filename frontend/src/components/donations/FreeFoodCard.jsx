@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatFullAddress } from '../../utils/locationUtils';
 import { toast } from 'react-toastify';
 import apiClient from '../../config/apiConfig';
 import { defaultVenue } from '../../assets';
 
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
   const formatDate = (date) => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('en-US', {
@@ -57,22 +60,36 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   };
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return defaultVenue;
+    if (!imagePath || imageError) return defaultVenue;
     return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
   };
 
   const handleImageError = (e) => {
+    setImageError(true);
+    setImageLoading(false);
     e.target.src = defaultVenue;
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
   };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <img 
-        src={getImageUrl(freeFood.venueImage)}
-        alt={freeFood.venue || 'Venue'}
-        onError={handleImageError}
-        className="w-full h-48 object-cover rounded-lg mb-4"
-      />
+      <div className="relative">
+        <img 
+          src={getImageUrl(freeFood.venueImage)}
+          alt={freeFood.venue || 'Venue'}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          className={`w-full h-48 object-cover rounded-lg mb-4 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+        />
+        {imageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+            <span className="text-gray-500">Loading...</span>
+          </div>
+        )}
+      </div>
       <h3 className="text-xl font-semibold mb-2">{freeFood.venue}</h3>
       <p className="text-gray-600 mb-2">Type: {freeFood.foodType}</p>
       <p className="text-gray-600 mb-2 font-medium">{getAvailabilityText()}</p>

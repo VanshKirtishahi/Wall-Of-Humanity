@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import api from '../../config/axios';
+import apiClient from '../../config/apiConfig';
 
 const FreeFoodForm = () => {
   const { id } = useParams();
@@ -68,7 +68,7 @@ const FreeFoodForm = () => {
   const fetchListing = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(`/api/free-food/${id}`);
+      const response = await apiClient.get(`/api/free-food/${id}`);
       const listing = response.data;
       
       if (!listing) {
@@ -207,9 +207,9 @@ const FreeFoodForm = () => {
 
       let response;
       if (id) {
-        response = await api.put(`/api/free-food/${id}`, formDataObj, config);
+        response = await apiClient.put(`/api/free-food/${id}`, formDataObj, config);
       } else {
-        response = await api.post('/api/free-food', formDataObj, config);
+        response = await apiClient.post('/api/free-food', formDataObj, config);
       }
 
       toast.success(id ? 'Free food listing updated successfully!' : 'Free food listing created successfully!');

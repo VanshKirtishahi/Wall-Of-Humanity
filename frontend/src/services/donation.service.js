@@ -1,11 +1,11 @@
-import api from '../config/api';
+import apiClient from '../config/apiConfig';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class DonationService {
   async getAllDonations() {
     try {
-      const response = await api.get('/api/donations');
+      const response = await apiClient.get('/api/donations');
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch donations');
@@ -25,7 +25,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.get('/donations/my-donations', {
+      const response = await apiClient.get('/donations/my-donations', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -49,7 +49,7 @@ class DonationService {
       const user = JSON.parse(userData);
       if (!user.token) throw new Error('Authentication required');
 
-      const response = await api.get(`/api/donations/${id}`, {
+      const response = await apiClient.get(`/api/donations/${id}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -152,7 +152,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.delete(`/donations/${id}`, {
+      const response = await apiClient.delete(`/donations/${id}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -205,7 +205,7 @@ class DonationService {
 
   async getStats() {
     try {
-      const response = await api.get('/donations/stats');
+      const response = await apiClient.get('/donations/stats');
       
       if (!response.data) {
         throw new Error('No data received');

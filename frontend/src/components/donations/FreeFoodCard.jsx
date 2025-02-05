@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatFullAddress } from '../../utils/locationUtils';
 import { toast } from 'react-toastify';
+import apiClient from '../../config/apiConfig';
 
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true }) => {
   const formatDate = (date) => {
@@ -56,7 +57,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/default-venue.jpg';
-    return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
+    return `${apiClient.defaults.baseURL}/uploads/free-food/${imagePath}`;
   };
 
   return (

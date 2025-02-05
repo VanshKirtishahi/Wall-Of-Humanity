@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 const FreeFoodListing = require('../models/FreeFoodListing');
 const fs = require('fs').promises;
 const { deleteUploadedImage } = require('../utils/fileUtils');
+const upload = require('../middleware/imageUpload');
 
 const router = express.Router();
 
@@ -16,23 +17,6 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, 'venue-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Only image files are allowed!'));
   }
 });
 
@@ -49,34 +33,21 @@ const handleMulterError = (err, req, res, next) => {
 };
 
 // Create new listing with image upload
-router.post('/', auth, upload.single('venueImage'), handleMulterError, async (req, res) => {
+router.post('/', auth, upload.single('venueImage'), async (req, res) => {
   try {
-    const listingData = {
+    const listing = new FreeFoodListing({
       ...req.body,
+      venueImage: req.file?.filename,
       uploadedBy: req.user._id
-    };
+    });
 
-    // Parse JSON strings back to objects
-    if (req.body.availability) {
-      listingData.availability = JSON.parse(req.body.availability);
-    }
-    if (req.body.location) {
-      listingData.location = JSON.parse(req.body.location);
-    }
-
-    // Add image path if image was uploaded
-    if (req.file) {
-      listingData.venueImage = req.file.filename;
-      console.log('Saved image filename:', req.file.filename);
-      console.log('Full image path:', path.join('uploads/free-food', req.file.filename));
-    }
-
-    const listing = new FreeFoodListing(listingData);
     await listing.save();
     res.status(201).json(listing);
   } catch (error) {
-    console.error('Error creating free food listing:', error);
-    res.status(500).json({ message: error.message });
+    if (req.file) {
+      await deleteUploadedImage(req.file.filename, 'free-food');
+    }
+    res.status(400).json({ message: error.message });
   }
 });
 
@@ -150,26 +121,23 @@ router.put('/:id', auth, upload.single('venueImage'), handleMulterError, async (
 // Delete listing
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const listing = await FreeFoodListing.findById(req.params.id);
-    
+    const listing = await FreeFoodListing.findOne({ 
+      _id: req.params.id,
+      uploadedBy: req.user._id 
+    });
+
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
     }
 
-    if (listing.uploadedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Not authorized to delete this listing' });
-    }
-
-    // Delete image if exists
     if (listing.venueImage) {
       await deleteUploadedImage(listing.venueImage, 'free-food');
     }
 
-    await FreeFoodListing.findByIdAndDelete(req.params.id);
+    await listing.deleteOne();
     res.json({ message: 'Listing deleted successfully' });
   } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({ message: 'Error deleting listing' });
+    res.status(500).json({ message: error.message });
   }
 });
 

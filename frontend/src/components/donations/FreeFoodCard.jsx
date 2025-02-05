@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatFullAddress } from '../../utils/locationUtils';
 import { toast } from 'react-toastify';
 import apiClient from '../../config/apiConfig';
@@ -7,6 +7,26 @@ import { defaultVenue } from '../../assets';
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [imageSrc, setImageSrc] = useState('');
+
+  useEffect(() => {
+    if (freeFood.venueImage) {
+      const url = `${import.meta.env.VITE_API_URL}/uploads/free-food/${freeFood.venueImage}`;
+      fetch(url, { method: 'HEAD' })
+        .then(res => {
+          if (!res.ok) throw new Error('Image not found');
+          setImageSrc(url);
+          setImageError(false);
+        })
+        .catch(() => {
+          setImageSrc(defaultVenue);
+          setImageError(true);
+        });
+    } else {
+      setImageSrc(defaultVenue);
+      setImageError(true);
+    }
+  }, [freeFood.venueImage]);
 
   const formatDate = (date) => {
     if (!date) return '';
@@ -59,34 +79,27 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
     }
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath || imageError) return defaultVenue;
-    return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
-  };
-
-  const handleImageError = (e) => {
+  const handleImageError = () => {
     setImageError(true);
     setImageLoading(false);
-    e.target.src = defaultVenue;
-  };
-
-  const handleImageLoad = () => {
-    setImageLoading(false);
+    setImageSrc(defaultVenue);
   };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="relative">
         <img 
-          src={getImageUrl(freeFood.venueImage)}
+          src={imageSrc}
           alt={freeFood.venue || 'Venue'}
           onError={handleImageError}
-          onLoad={handleImageLoad}
-          className={`w-full h-48 object-cover rounded-lg mb-4 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+          onLoad={() => setImageLoading(false)}
+          className={`w-full h-48 object-cover rounded-lg mb-4 transition-opacity duration-300 ${
+            imageLoading ? 'opacity-0' : 'opacity-100'
+          }`}
         />
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-            <span className="text-gray-500">Loading...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         )}
       </div>

@@ -1,17 +1,18 @@
 const errorHandler = (err, req, res, next) => {
-  // Log the full error details
-  console.error('Error details:', {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Log error
+  console.error({
     message: err.message,
-    name: err.name,
-    stack: err.stack,
-    code: err.code,
-    status: err.status
+    stack: isProduction ? '🥞' : err.stack,
+    timestamp: new Date().toISOString()
   });
 
   // Handle specific error types
   if (err.name === 'ValidationError') {
     return res.status(400).json({
-      message: Object.values(err.errors).map(error => error.message).join(', ')
+      message: 'Validation Error',
+      errors: Object.values(err.errors).map(e => e.message)
     });
   }
 
@@ -21,7 +22,7 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  if (err.name === 'JsonWebTokenError') {
+  if (err.name === 'UnauthorizedError') {
     return res.status(401).json({
       message: 'Invalid token'
     });
@@ -49,13 +50,10 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Default error response
-  const statusCode = err.status || 500;
-  res.status(statusCode).json({
-    message: process.env.NODE_ENV === 'development' 
-      ? err.message
-      : 'An unexpected error occurred',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  // Send error response
+  res.status(err.status || 500).json({
+    message: isProduction ? 'Internal Server Error' : err.message,
+    error: isProduction ? {} : err
   });
 };
 

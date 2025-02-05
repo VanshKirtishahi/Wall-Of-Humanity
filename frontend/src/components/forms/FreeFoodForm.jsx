@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -9,7 +9,9 @@ const FreeFoodForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const imageInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   
   const foodTypes = [
@@ -151,21 +153,33 @@ const FreeFoodForm = () => {
     }
   };
 
-  const handleImageError = (e) => {
-    e.target.src = defaultVenue;
-    toast.error('Failed to load image preview');
-  };
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error('Image size should be less than 5MB');
+        toast.error('Image size must be less than 5MB');
+        imageInputRef.current.value = '';
         return;
       }
-      setFormData(prev => ({...prev, venueImage: file}));
-      setImagePreview(URL.createObjectURL(file));
+
+      if (!file.type.match('image.*')) {
+        toast.error('Please select an image file');
+        imageInputRef.current.value = '';
+        return;
+      }
+
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleImageError = (e) => {
+    e.target.src = defaultVenue;
+    toast.error('Failed to load image preview');
   };
 
   const handleSubmit = async (e) => {
@@ -173,13 +187,12 @@ const FreeFoodForm = () => {
     setIsLoading(true);
     
     try {
-      // Create FormData object
-      const formDataObj = new FormData();
+      const formData = new FormData();
       
       // Append basic fields
-      formDataObj.append('venue', formData.venue);
-      formDataObj.append('foodType', formData.foodType);
-      formDataObj.append('organizedBy', formData.organizedBy || '');
+      formData.append('venue', formData.venue);
+      formData.append('foodType', formData.foodType);
+      formData.append('organizedBy', formData.organizedBy || '');
 
       // Handle availability data
       const availabilityData = {
@@ -188,7 +201,7 @@ const FreeFoodForm = () => {
         endTime: formData.availability.endTime,
         specificDate: formData.availability.type === 'specific' ? formData.availability.specificDate : null
       };
-      formDataObj.append('availability', JSON.stringify(availabilityData));
+      formData.append('availability', JSON.stringify(availabilityData));
 
       // Handle location data
       const locationData = {
@@ -198,24 +211,26 @@ const FreeFoodForm = () => {
         state: formData.location.state,
         coordinates: formData.location.coordinates
       };
-      formDataObj.append('location', JSON.stringify(locationData));
+      formData.append('location', JSON.stringify(locationData));
 
       // Handle image
-      if (formData.venueImage instanceof File) {
-        formDataObj.append('venueImage', formData.venueImage);
+      if (imageFile) {
+        formData.append('venueImage', imageFile);
       }
-
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      };
 
       let response;
       if (id) {
-        response = await apiClient.put(`/api/free-food/${id}`, formDataObj, config);
+        response = await apiClient.put(`/api/free-food/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
       } else {
-        response = await apiClient.post('/api/free-food', formDataObj, config);
+        response = await apiClient.post('/api/free-food', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
       }
 
       toast.success(id ? 'Free food listing updated successfully!' : 'Free food listing created successfully!');
@@ -411,6 +426,7 @@ const FreeFoodForm = () => {
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
+                ref={imageInputRef}
                 className="w-full px-4 py-2 rounded-lg border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {imagePreview && (

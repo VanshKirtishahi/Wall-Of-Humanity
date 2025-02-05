@@ -26,11 +26,22 @@ mongoose.connection.once('open', () => {
 });
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173', // development
+  'https://your-production-domain.com' // replace with your actual domain
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://wall-of-humanity.vercel.app'],
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -87,6 +98,7 @@ if (!fs.existsSync(uploadsDir)){
 // Serve static files from uploads directory with proper CORS headers
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
   next();
 }, express.static(path.join(__dirname, 'uploads')));
 
@@ -109,9 +121,6 @@ app.use('/api/ngos', ngoRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/free-food', freeFoodRoutes);
-
-// Add this after your other middleware
-app.use('/uploads', express.static('uploads'));
 
 // Error handling middleware should be last
 app.use(errorHandler);

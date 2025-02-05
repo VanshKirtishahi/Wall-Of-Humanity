@@ -56,8 +56,12 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   };
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/default-venue.jpg';
-    return `${apiClient.defaults.baseURL}/uploads/free-food/${imagePath}`;
+    if (!imagePath) return '/images/default-venue.jpg';
+    return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
+  };
+
+  const handleImageError = (e) => {
+    e.target.src = '/images/default-venue.jpg';
   };
 
   return (
@@ -65,12 +69,8 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
       <img 
         src={getImageUrl(freeFood.venueImage)}
         alt={freeFood.venue || 'Venue'}
+        onError={handleImageError}
         className="w-full h-48 object-cover rounded-lg mb-4"
-        onError={(e) => {
-          console.error('Image load error for:', freeFood.venueImage);
-          e.target.src = '/default-venue.jpg';
-          e.target.onerror = null;
-        }}
       />
       <h3 className="text-xl font-semibold mb-2">{freeFood.venue}</h3>
       <p className="text-gray-600 mb-2">Type: {freeFood.foodType}</p>

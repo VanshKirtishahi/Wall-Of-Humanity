@@ -162,6 +162,10 @@ const FreeFoodForm = () => {
     }
   };
 
+  const handleImageError = (e) => {
+    e.target.src = '/images/default-venue.jpg';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -409,7 +413,12 @@ const FreeFoodForm = () => {
               />
               {imagePreview && (
                 <div className="mt-2">
-                  <img src={imagePreview} alt="Preview" className="h-48 w-auto object-cover rounded-lg" />
+                  <img 
+                    src={imagePreview} 
+                    alt="Venue preview" 
+                    onError={handleImageError}
+                    className="mt-2 max-w-xs h-auto"
+                  />
                 </div>
               )}
             </div>

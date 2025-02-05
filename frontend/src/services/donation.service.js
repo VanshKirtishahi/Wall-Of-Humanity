@@ -1,11 +1,11 @@
-import api from './api';
+import api from '../config/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class DonationService {
   async getAllDonations() {
     try {
-      const response = await api.get('/donations');
+      const response = await api.get('/api/donations');
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch donations');
@@ -44,33 +44,18 @@ class DonationService {
   async getDonationById(id) {
     try {
       const userData = localStorage.getItem('user');
-      if (!userData) {
-        throw new Error('Authentication required');
-      }
-
+      if (!userData) throw new Error('Authentication required');
+      
       const user = JSON.parse(userData);
-      if (!user.token) {
-        localStorage.removeItem('user');
-        throw new Error('Authentication required');
-      }
+      if (!user.token) throw new Error('Authentication required');
 
-      const response = await fetch(`http://localhost:5000/api/donations/${id}`, {
+      const response = await api.get(`/api/donations/${id}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
       });
 
-      if (response.status === 401) {
-        localStorage.removeItem('user');
-        throw new Error('Authentication required');
-      }
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch donation');
-      }
-
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Get donation error:', error);
       throw error;

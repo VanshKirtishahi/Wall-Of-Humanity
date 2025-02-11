@@ -111,7 +111,7 @@ router.post('/', auth, upload.single('images'), async (req, res) => {
       user: req.userId,
       userId: req.userId,
       donorName: req.user.name,
-      images: req.file ? [req.file.filename] : []  // Store just the filename
+      images: req.file ? [`${req.file.filename}`] : []
     };
 
     const donation = new Donation(donationData);

@@ -41,20 +41,21 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
     return [address, area, city, state].filter(Boolean).join(', ');
   };
 
-  const handleGetLocation = () => {
-    const { coordinates } = donation.location || {};
-    if (coordinates?.lat && coordinates?.lng) {
-      const mapUrl = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`;
-      window.open(mapUrl, '_blank');
-    } else {
-      // If no coordinates, try to open with address
-      const address = formatFullAddress(donation.location);
-      if (address) {
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-        window.open(mapUrl, '_blank');
-      } else {
-        alert('Location information is not available');
-      }
+  const handleRequest = (donationId) => {
+    // Implement request logic here
+    console.log('Requesting donation:', donationId);
+    // You might want to navigate to a request form or open a modal
+  };
+
+  const handleGetLocation = (location) => {
+    // Implement location handling logic here
+    if (location?.coordinates) {
+      // Open in Google Maps if coordinates are available
+      window.open(`https://www.google.com/maps?q=${location.coordinates[1]},${location.coordinates[0]}`, '_blank');
+    } else if (location?.address) {
+      // Open address in Google Maps
+      const searchQuery = encodeURIComponent(`${location.address}, ${location.area}, ${location.city}, ${location.state}`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
     }
   };
 
@@ -120,7 +121,7 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
           className="w-full h-full object-cover"
           onError={(e) => {
             console.error('Image load error for:', donation.title);
-            e.target.onerror = null; // Prevent infinite loop
+            e.target.onerror = null;
             e.target.src = DEFAULT_DONATION_IMAGE;
           }}
         />
@@ -195,16 +196,16 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
-              <button 
+            <div className="flex justify-between gap-2">
+              <button
                 onClick={handleRequestClick}
-                className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
               >
                 Request
               </button>
               <button
-                onClick={handleGetLocation}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                onClick={() => handleGetLocation(donation.location)}
+                className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
                 Get Location
               </button>

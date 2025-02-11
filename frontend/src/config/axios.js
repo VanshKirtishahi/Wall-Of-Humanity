@@ -12,7 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Remove any double /api occurrences in the URL
-    config.url = config.url.replace(/\/api\/api\//, '/api/');
+    if (config.url?.startsWith('/api/')) {
+      config.url = config.url.substring(4); // Remove the leading /api
+    }
     
     const token = localStorage.getItem('token');
     if (token) {
@@ -27,6 +29,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.data || error.message);
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

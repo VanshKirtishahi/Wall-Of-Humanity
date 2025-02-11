@@ -25,12 +25,6 @@ mongoose.connection.once('open', () => {
 });
 
 // Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com']
-    : ['http://localhost:5173'],
-  credentials: true
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

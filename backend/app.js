@@ -12,7 +12,7 @@ const app = express();
 // Security Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://wall-of-humanity.vercel.app', 'https://wall-of-humanity.vercel.app/']
+    ? 'https://wall-of-humanity.vercel.app'
     : 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -44,6 +44,9 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'public')));
 
+// Add after CORS configuration
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);

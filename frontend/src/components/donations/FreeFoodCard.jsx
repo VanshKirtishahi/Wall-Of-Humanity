@@ -28,7 +28,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   const getImageUrl = (imagePath) => {
     try {
       if (!imagePath) return DEFAULT_VENUE_IMAGE;
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, ''); // Remove trailing slash if present
       return `${baseUrl}/uploads/free-food/${imagePath}`;
     } catch (error) {
       console.error('Error processing venue image URL:', error);
@@ -79,8 +79,10 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
           alt={freeFood.venue || 'Venue'}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.target.src = '/default-venue.jpg';
+            console.error('Image load error for:', freeFood.venue);
+            console.error('Attempted URL:', e.target.src);
             e.target.onerror = null;
+            e.target.src = DEFAULT_VENUE_IMAGE;
           }}
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/50" />

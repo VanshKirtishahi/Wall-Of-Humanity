@@ -137,7 +137,7 @@ const DonationForm = () => {
 
   const updateImagePreview = (images) => {
     if (images && images.length > 0) {
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '');
       setImagePreview(Array.isArray(images) 
         ? `${baseUrl}/uploads/donations/${images[0]}`
         : `${baseUrl}/uploads/donations/${images}`

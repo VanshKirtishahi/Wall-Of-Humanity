@@ -95,10 +95,6 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
   const getImageUrl = (imagePath) => {
     try {
-      if (!imagePath || (Array.isArray(imagePath) && imagePath.length === 0)) {
-        return DEFAULT_DONATION_IMAGE;
-      }
-
       // Handle array of images
       if (Array.isArray(imagePath)) {
         const firstImage = imagePath[0];

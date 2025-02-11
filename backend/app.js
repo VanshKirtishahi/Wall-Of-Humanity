@@ -35,6 +35,12 @@ app.use(express.static('public'));
 // Add this before your routes
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'public/uploads/donations');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);

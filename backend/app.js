@@ -6,6 +6,7 @@ const donationRoutes = require('./routes/donationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 const freeFoodRoutes = require('./routes/freeFoodRoutes');
+const fs = require('fs');
 
 const app = express();
 
@@ -24,6 +25,12 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Static Files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, 'uploads/avatars');
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // API Routes
 app.use('/api/auth', authRoutes);

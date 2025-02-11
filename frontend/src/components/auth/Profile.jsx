@@ -171,6 +171,13 @@ const Profile = () => {
     return isValid(date) ? format(date, 'MMM dd, yyyy') : 'Invalid date';
   };
 
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return defaultAvatar;
+    return avatarPath.startsWith('data:') 
+      ? avatarPath 
+      : `${import.meta.env.VITE_API_URL}${avatarPath}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex justify-center items-center">
@@ -210,7 +217,7 @@ const Profile = () => {
               <div className="-mt-16 relative">
                 <div className="relative">
                   <img
-                    src={avatarPreview || (profileData?.avatarUrl ? `http://localhost:5000${profileData.avatarUrl}` : defaultAvatar)}
+                    src={getAvatarUrl(avatarPreview || profileData?.avatarUrl)}
                     alt="Profile"
                     className="h-32 w-32 rounded-full border-4 border-white object-cover bg-white shadow-lg"
                     onError={(e) => {

@@ -14,33 +14,26 @@ const emailService = require('../services/email.service');
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'uploads/avatars';
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
+    cb(null, 'uploads/avatars/');
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Not an image! Please upload an image.'), false);
-  }
-};
-
-const upload = multer({
+const upload = multer({ 
   storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
-  fileFilter: fileFilter
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not an image! Please upload an image.'), false);
+    }
+  }
 });
 
 // Test route to verify auth routes are working
@@ -241,7 +234,7 @@ router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update all fields if provided
+    // Update fields if provided
     if (req.body.name) user.name = req.body.name;
     if (req.body.email) user.email = req.body.email;
     if (req.body.bio) user.bio = req.body.bio;
@@ -254,8 +247,6 @@ router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
     }
 
     const updatedUser = await user.save();
-    
-    // Send back user without password
     const userResponse = updatedUser.toObject();
     delete userResponse.password;
     

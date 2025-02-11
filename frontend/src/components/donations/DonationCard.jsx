@@ -104,15 +104,25 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
       // Handle array of images
       if (Array.isArray(imagePath)) {
         const firstImage = imagePath[0];
-        const fullUrl = `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`;
-        console.log('Full image URL:', fullUrl);
-        return firstImage ? fullUrl : DEFAULT_DONATION_IMAGE;
+        if (!firstImage) return DEFAULT_DONATION_IMAGE;
+        
+        // If the image path is already a full URL, return it
+        if (firstImage.startsWith('http')) {
+          return firstImage;
+        }
+        
+        return `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`;
       }
 
       // Handle single image path
-      const fullUrl = `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
-      console.log('Full image URL:', fullUrl);
-      return fullUrl;
+      if (typeof imagePath === 'string') {
+        if (imagePath.startsWith('http')) {
+          return imagePath;
+        }
+        return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
+      }
+
+      return DEFAULT_DONATION_IMAGE;
     } catch (error) {
       console.error('Error processing image URL:', error);
       return DEFAULT_DONATION_IMAGE;
@@ -128,8 +138,9 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
           alt={donation.title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = DEFAULT_DONATION_IMAGE;
+            console.error('Image load error:', e);
+            e.target.onerror = null; // Prevent infinite loop
+            e.target.src = 'https://via.placeholder.com/400x300?text=No+Image+Available';
           }}
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/50" />

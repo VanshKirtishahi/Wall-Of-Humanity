@@ -30,6 +30,24 @@ if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Ensure the default image exists in public/images/
+const defaultImageDir = path.join(__dirname, 'public/images');
+if (!fs.existsSync(defaultImageDir)) {
+  fs.mkdirSync(defaultImageDir, { recursive: true });
+}
+
+// Copy default image if it doesn't exist
+const defaultImagePath = path.join(defaultImageDir, 'default-donation.jpg');
+if (!fs.existsSync(defaultImagePath)) {
+  fs.copyFileSync(
+    path.join(__dirname, 'assets/default-donation.jpg'), // Make sure this exists
+    defaultImagePath
+  );
+}
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);

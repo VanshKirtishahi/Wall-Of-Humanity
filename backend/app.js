@@ -32,6 +32,8 @@ if (!fs.existsSync(uploadDir)){
 
 // Serve static files from public directory
 app.use(express.static('public'));
+// Add this before your routes
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);

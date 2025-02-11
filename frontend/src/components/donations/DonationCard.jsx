@@ -104,12 +104,15 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
         const firstImage = imagePath[0];
         if (!firstImage) return DEFAULT_DONATION_IMAGE;
         
-        return `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`;
+        // Ensure HTTPS URL
+        const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
+        return `${baseUrl}/uploads/donations/${firstImage}`;
       }
 
       // Handle single image path
       if (typeof imagePath === 'string') {
-        return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
+        const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
+        return `${baseUrl}/uploads/donations/${imagePath}`;
       }
 
       return DEFAULT_DONATION_IMAGE;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatFullAddress } from '../../utils/locationUtils';
 import { toast } from 'react-toastify';
+import { DEFAULT_VENUE_IMAGE } from '../../constants/images';
 
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true, showEditDelete = true }) => {
   const handleGetLocation = () => {
@@ -25,8 +26,14 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   };
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/default-venue.jpg';
-    return `${import.meta.env.VITE_API_URL}/uploads/free-food/${imagePath}`;
+    try {
+      if (!imagePath) return DEFAULT_VENUE_IMAGE;
+      const baseUrl = import.meta.env.VITE_API_URL;
+      return `${baseUrl}/uploads/free-food/${imagePath}`;
+    } catch (error) {
+      console.error('Error processing venue image URL:', error);
+      return DEFAULT_VENUE_IMAGE;
+    }
   };
 
   const formatAvailability = () => {

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import donationService from '../../services/donation.service';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { DEFAULT_DONATION_IMAGE, DEFAULT_VENUE_IMAGE } from '../../constants/images';
 
 const DonationForm = () => {
   const { user } = useAuth();
@@ -81,10 +82,7 @@ const DonationForm = () => {
             }
           });
           
-          if (donation.images && donation.images.length > 0) {
-            const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
-            setImagePreview(`${baseUrl}/uploads/donations/${donation.images[0]}`);
-          }
+          updateImagePreview(donation.images);
         } catch (error) {
           if (error.message === 'Authentication required') {
             navigate('/login', { 
@@ -134,6 +132,18 @@ const DonationForm = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const updateImagePreview = (images) => {
+    if (images && images.length > 0) {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      setImagePreview(Array.isArray(images) 
+        ? `${baseUrl}/uploads/donations/${images[0]}`
+        : `${baseUrl}/uploads/donations/${images}`
+      );
+    } else {
+      setImagePreview(DEFAULT_DONATION_IMAGE);
     }
   };
 

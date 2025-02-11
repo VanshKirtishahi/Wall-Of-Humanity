@@ -96,15 +96,13 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
   const getImageUrl = (imagePath) => {
     try {
-      if (Array.isArray(imagePath) && imagePath[0]) {
-        const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
-        return `${baseUrl}/uploads/donations/${imagePath[0]}`;
+      if (!imagePath) return DEFAULT_DONATION_IMAGE;
+      
+      const baseUrl = import.meta.env.VITE_API_URL;
+      if (Array.isArray(imagePath)) {
+        return imagePath[0] ? `${baseUrl}/uploads/donations/${imagePath[0]}` : DEFAULT_DONATION_IMAGE;
       }
-      if (typeof imagePath === 'string') {
-        const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
-        return `${baseUrl}/uploads/donations/${imagePath}`;
-      }
-      return DEFAULT_DONATION_IMAGE;
+      return `${baseUrl}/uploads/donations/${imagePath}`;
     } catch (error) {
       console.error('Error processing image URL:', error);
       return DEFAULT_DONATION_IMAGE;

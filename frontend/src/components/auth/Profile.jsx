@@ -109,34 +109,19 @@ const Profile = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      
-      // Append profile data
-      Object.keys(editedData).forEach(key => {
-        if (editedData[key] !== undefined && editedData[key] !== null) {
-          formData.append(key, editedData[key]);
-        }
-      });
-
-      // Append avatar if changed
+      formData.append('name', editedData.name);
+      formData.append('email', editedData.email);
       if (avatar) {
         formData.append('avatar', avatar);
       }
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/profile/update', {
-        method: 'PUT',
+      const response = await api.put('/auth/profile/update', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      const updatedData = await response.json();
+      const updatedData = response.data;
       
       // Update context and local storage with new user data
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -149,14 +134,13 @@ const Profile = () => {
       
       setProfileData(updatedData);
       if (updatedData.avatarUrl) {
-        setAvatarPreview(`http://localhost:5000${updatedData.avatarUrl}`);
+        setAvatarPreview(`${import.meta.env.VITE_API_URL}${updatedData.avatarUrl}`);
       }
       setIsEditing(false);
       toast.success('Profile updated successfully!');
-
     } catch (error) {
       console.error('Update error:', error);
-      toast.error(error.message || 'Failed to update profile');
+      toast.error(error.response?.data?.message || 'Failed to update profile');
     }
   };
 
@@ -173,37 +157,16 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        const userStr = localStorage.getItem('user');
-        if (!userStr) throw new Error('No authentication token found');
-        
-        const user = JSON.parse(userStr);
-        if (!user.token) throw new Error('Invalid authentication token');
-
-        const response = await fetch('http://localhost:5000/api/auth/profile/delete', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${user.token}`
-          }
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to delete account');
-        }
-
-        // Clear all local storage data
+        await api.delete('/auth/profile/delete');
         localStorage.clear();
-        
-        // Call logout to clear auth context
         logout();
-        
         toast.success('Account deleted successfully');
         navigate('/login');
       } catch (error) {
         console.error('Delete account error:', error);
-        toast.error(error.message || 'Failed to delete account');
+        toast.error(error.response?.data?.message || 'Failed to delete account');
         
-        if (error.message.includes('token')) {
+        if (error.response?.status === 401) {
           logout();
           navigate('/login');
         }

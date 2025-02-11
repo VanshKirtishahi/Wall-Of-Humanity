@@ -82,7 +82,8 @@ const DonationForm = () => {
           });
           
           if (donation.images && donation.images.length > 0) {
-            setImagePreview(`http://localhost:5000/uploads/donations/${donation.images[0]}`);
+            const baseUrl = import.meta.env.VITE_API_URL.replace('http://', 'https://');
+            setImagePreview(`${baseUrl}/uploads/donations/${donation.images[0]}`);
           }
         } catch (error) {
           if (error.message === 'Authentication required') {

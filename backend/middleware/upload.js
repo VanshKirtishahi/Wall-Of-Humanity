@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    cb(null, uploadPath);
+    cb(null, 'public/uploads/donations');
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

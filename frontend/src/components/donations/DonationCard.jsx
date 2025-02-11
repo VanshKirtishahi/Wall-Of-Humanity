@@ -98,23 +98,21 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
       console.log('Image path received:', imagePath);
 
       if (!imagePath || (Array.isArray(imagePath) && imagePath.length === 0)) {
-        console.log('No image path, using default');
         return DEFAULT_DONATION_IMAGE;
       }
 
-      if (typeof imagePath === 'string' && (imagePath.startsWith('http') || imagePath.startsWith('data:'))) {
-        return imagePath;
-      }
-
+      // Handle array of images
       if (Array.isArray(imagePath)) {
         const firstImage = imagePath[0];
-        console.log('Using first image from array:', firstImage);
-        return firstImage 
-          ? `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`
-          : DEFAULT_DONATION_IMAGE;
+        const fullUrl = `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`;
+        console.log('Full image URL:', fullUrl);
+        return firstImage ? fullUrl : DEFAULT_DONATION_IMAGE;
       }
 
-      return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
+      // Handle single image path
+      const fullUrl = `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
+      console.log('Full image URL:', fullUrl);
+      return fullUrl;
     } catch (error) {
       console.error('Error processing image URL:', error);
       return DEFAULT_DONATION_IMAGE;

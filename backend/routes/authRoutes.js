@@ -172,18 +172,14 @@ router.post('/login', async (req, res) => {
 // Get profile route
 router.get('/profile', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId)
-      .select('name email bio phone address avatarUrl createdAt updatedAt')
-      .lean(); // Use lean() for better performance
-
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     res.json(user);
   } catch (error) {
-    console.error('Profile fetch error:', error);
-    res.status(500).json({ message: 'Error fetching profile' });
+    console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -238,56 +234,27 @@ router.get('/verify', auth, async (req, res) => {
 });
 
 // Update profile route
-router.put('/profile/update', auth, upload.single('avatar'), async (req, res) => {
+router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update allowed fields
-    const allowedUpdates = ['name', 'email', 'bio', 'phone', 'address'];
-    allowedUpdates.forEach(field => {
-      if (req.body[field] !== undefined) {
-        user[field] = req.body[field];
-      }
-    });
-
+    // Update fields
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    
     // Handle avatar upload
     if (req.file) {
-      // Delete old avatar if exists
-      if (user.avatarUrl) {
-        const oldAvatarPath = path.join(__dirname, '..', 'uploads', 'avatars', path.basename(user.avatarUrl));
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-        }
-      }
       user.avatarUrl = `/uploads/avatars/${req.file.filename}`;
     }
 
     await user.save();
-    
-    // Return updated user object without password
-    const userResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      bio: user.bio,
-      phone: user.phone,
-      address: user.address,
-      avatarUrl: user.avatarUrl,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    };
-    
-    res.json(userResponse);
+    res.json(user);
   } catch (error) {
-    console.error('Profile update error:', error);
-    if (error.code === 11000) {
-      res.status(400).json({ message: 'Email already exists' });
-    } else {
-      res.status(500).json({ message: 'Error updating profile' });
-    }
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 });
 

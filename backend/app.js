@@ -47,6 +47,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'public')));
 // Add after CORS configuration
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Create upload directories if they don't exist
+const uploadDirs = ['uploads/donations', 'uploads/free-food'];
+uploadDirs.forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath, { recursive: true });
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);

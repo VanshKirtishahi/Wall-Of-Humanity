@@ -119,6 +119,8 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
           className="w-full h-full object-cover"
           onError={(e) => {
             console.error('Image load error for:', donation.title);
+            console.error('Attempted URL:', e.target.src);
+            console.error('Image path:', donation.images);
             e.target.onerror = null;
             e.target.src = DEFAULT_DONATION_IMAGE;
           }}

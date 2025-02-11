@@ -81,6 +81,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
           onError={(e) => {
             console.error('Image load error for:', freeFood.venue);
             console.error('Attempted URL:', e.target.src);
+            console.error('Image path:', freeFood.venueImage);
             e.target.onerror = null;
             e.target.src = DEFAULT_VENUE_IMAGE;
           }}

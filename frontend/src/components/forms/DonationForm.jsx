@@ -141,27 +141,9 @@ const DonationForm = () => {
     setIsLoading(true);
 
     try {
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        navigate('/login', { 
-          state: { from: location.pathname },
-          replace: true 
-        });
-        return;
-      }
-
-      const user = JSON.parse(userData);
-      if (!user.token) {
-        localStorage.removeItem('user');
-        navigate('/login', { 
-          state: { from: location.pathname },
-          replace: true 
-        });
-        return;
-      }
-
       const formDataToSend = new FormData();
       
+      // Add all form data except images
       Object.keys(formData).forEach(key => {
         if (key === 'availability' || key === 'location') {
           formDataToSend.append(key, JSON.stringify(formData[key]));
@@ -170,6 +152,7 @@ const DonationForm = () => {
         }
       });
       
+      // Add image if exists
       if (image) {
         formDataToSend.append('images', image);
       }
@@ -177,24 +160,18 @@ const DonationForm = () => {
       let response;
       if (id) {
         response = await donationService.updateDonation(id, formDataToSend);
-        toast.success('Donation updated successfully!');
       } else {
-        response = await donationService.createDonation(formDataToSend);
-        toast.success('Donation created successfully!');
+        response = await donationService.createDonationWithImage(formDataToSend);
       }
 
+      // Log the response to check the image path
+      console.log('Donation response:', response);
+
+      toast.success(`Donation ${id ? 'updated' : 'created'} successfully!`);
       navigate('/my-donations');
     } catch (error) {
-      console.error('Form submission error:', error);
-      if (error.message === 'Authentication required') {
-        localStorage.removeItem('user');
-        navigate('/login', { 
-          state: { from: location.pathname },
-          replace: true 
-        });
-      } else {
-        toast.error(error.message || 'Failed to process donation');
-      }
+      console.error('Submission error:', error);
+      toast.error(error.message || 'Failed to submit donation');
     } finally {
       setIsLoading(false);
     }

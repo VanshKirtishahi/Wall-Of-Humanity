@@ -95,7 +95,10 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
   const getImageUrl = (imagePath) => {
     try {
+      console.log('Image path received:', imagePath);
+
       if (!imagePath || (Array.isArray(imagePath) && imagePath.length === 0)) {
+        console.log('No image path, using default');
         return DEFAULT_DONATION_IMAGE;
       }
 
@@ -105,7 +108,10 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
       if (Array.isArray(imagePath)) {
         const firstImage = imagePath[0];
-        return firstImage ? `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}` : DEFAULT_DONATION_IMAGE;
+        console.log('Using first image from array:', firstImage);
+        return firstImage 
+          ? `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`
+          : DEFAULT_DONATION_IMAGE;
       }
 
       return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;

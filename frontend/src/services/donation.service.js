@@ -168,7 +168,6 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      // Add user data to formData
       formData.append('userId', user._id);
       formData.append('user', user._id);
 
@@ -185,7 +184,9 @@ class DonationService {
         throw new Error(error.message || 'Failed to create donation');
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('Created donation:', data);
+      return data;
     } catch (error) {
       console.error('Create donation error:', error);
       throw error;

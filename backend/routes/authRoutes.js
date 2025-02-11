@@ -241,17 +241,25 @@ router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update fields
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    // Update all fields if provided
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.bio) user.bio = req.body.bio;
+    if (req.body.phone) user.phone = req.body.phone;
+    if (req.body.address) user.address = req.body.address;
     
     // Handle avatar upload
     if (req.file) {
       user.avatarUrl = `/uploads/avatars/${req.file.filename}`;
     }
 
-    await user.save();
-    res.json(user);
+    const updatedUser = await user.save();
+    
+    // Send back user without password
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
+    
+    res.json(userResponse);
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: 'Failed to update profile' });

@@ -101,8 +101,12 @@ const Profile = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append('name', editedData.name);
-      formData.append('email', editedData.email);
+      Object.keys(editedData).forEach(key => {
+        if (editedData[key] !== undefined && editedData[key] !== null) {
+          formData.append(key, editedData[key]);
+        }
+      });
+      
       if (avatar) {
         formData.append('avatar', avatar);
       }
@@ -113,10 +117,17 @@ const Profile = () => {
         }
       });
 
+      // Update local state and context
       setProfileData(response.data);
       if (response.data.avatarUrl) {
         setAvatarPreview(`${import.meta.env.VITE_API_URL}${response.data.avatarUrl}`);
       }
+      
+      // Update user context
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = { ...currentUser, ...response.data };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       setIsEditing(false);
       toast.success('Profile updated successfully!');
     } catch (error) {

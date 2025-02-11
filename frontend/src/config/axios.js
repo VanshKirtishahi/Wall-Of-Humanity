@@ -11,15 +11,20 @@ const api = axios.create({
 // Add request interceptor for auth token
 api.interceptors.request.use(
   (config) => {
-    // Remove any double /api occurrences in the URL
     if (config.url?.startsWith('/api/')) {
-      config.url = config.url.substring(4); // Remove the leading /api
+      config.url = config.url.substring(4);
     }
     
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Don't override Content-Type if it's multipart/form-data
+    if (!config.headers['Content-Type']?.includes('multipart/form-data')) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)

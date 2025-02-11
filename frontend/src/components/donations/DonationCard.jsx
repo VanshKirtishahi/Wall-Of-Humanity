@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { calculateDistance, formatDistance, formatFullAddress } from '../../utils/locationUtils';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
+import { DEFAULT_DONATION_IMAGE } from '../../constants/images';
 
 const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => {
   const { isAuthenticated } = useAuth();
@@ -94,20 +95,19 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
   const getImageUrl = (imagePath) => {
     try {
-      if (Array.isArray(imagePath)) {
-        const firstImage = imagePath[0];
-        if (!firstImage) return '/default-donation.jpg';
-        return `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}`;
+      if (!imagePath || (Array.isArray(imagePath) && imagePath.length === 0)) {
+        return DEFAULT_DONATION_IMAGE;
       }
 
-      if (typeof imagePath === 'string') {
-        return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
+      if (Array.isArray(imagePath)) {
+        return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath[0]}`;
       }
+
+      return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;
     } catch (error) {
       console.error('Error processing image URL:', error);
-      return '/default-donation.jpg';
+      return DEFAULT_DONATION_IMAGE;
     }
-    return '/default-donation.jpg';
   };
 
   return (
@@ -119,8 +119,8 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
           alt={donation.title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.target.src = '/default-donation.jpg';
             e.target.onerror = null;
+            e.target.src = DEFAULT_DONATION_IMAGE;
           }}
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/50" />

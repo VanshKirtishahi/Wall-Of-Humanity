@@ -31,15 +31,16 @@ if (!fs.existsSync(uploadDir)){
 }
 
 // Serve static files from public directory
-app.use(express.static('public'));
-// Add this before your routes
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'public/uploads/donations');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Create upload directories if they don't exist
+const uploadDirs = ['public/uploads/donations', 'public/uploads/free-food'];
+uploadDirs.forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath, { recursive: true });
+  }
+});
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'public')));
@@ -49,15 +50,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Create upload directories if they don't exist
-const uploadDirs = ['uploads/donations', 'uploads/free-food'];
-uploadDirs.forEach(dir => {
-  const fullPath = path.join(__dirname, dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
-  }
-});
 
 // API Routes
 app.use('/api/auth', authRoutes);

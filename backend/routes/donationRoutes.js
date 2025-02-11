@@ -117,6 +117,9 @@ router.post('/', auth, upload.single('images'), async (req, res) => {
     const donation = new Donation(donationData);
     await donation.save();
     
+    console.log('File saved:', req.file);
+    console.log('Image path:', req.file ? req.file.filename : 'No image');
+    
     res.status(201).json(donation);
   } catch (error) {
     console.error('Error creating donation:', error);

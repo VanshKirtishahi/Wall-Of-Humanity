@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Create uploads directory if it doesn't exist
-const uploadDir = path.join(__dirname, 'uploads/avatars');
+const uploadDir = path.join(__dirname, 'uploads/donations');
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
 }

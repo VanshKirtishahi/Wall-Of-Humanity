@@ -172,7 +172,7 @@ class DonationService {
       formData.append('userId', user._id);
       formData.append('user', user._id);
 
-      const response = await fetch('http://localhost:5000/api/donations', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/donations`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`

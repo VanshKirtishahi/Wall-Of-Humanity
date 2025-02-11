@@ -99,8 +99,13 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
         return DEFAULT_DONATION_IMAGE;
       }
 
+      if (typeof imagePath === 'string' && (imagePath.startsWith('http') || imagePath.startsWith('data:'))) {
+        return imagePath;
+      }
+
       if (Array.isArray(imagePath)) {
-        return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath[0]}`;
+        const firstImage = imagePath[0];
+        return firstImage ? `${import.meta.env.VITE_API_URL}/uploads/donations/${firstImage}` : DEFAULT_DONATION_IMAGE;
       }
 
       return `${import.meta.env.VITE_API_URL}/uploads/donations/${imagePath}`;

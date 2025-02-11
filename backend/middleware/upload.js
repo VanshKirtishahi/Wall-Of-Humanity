@@ -8,12 +8,11 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    cb(null, 'public/uploads/donations');
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const filename = uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '-');
-    // Store only the filename in the database, not the full path
     if (req.fileNames) {
       req.fileNames.push(filename);
     } else {

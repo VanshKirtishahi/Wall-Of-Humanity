@@ -105,17 +105,13 @@ router.get('/my-donations', auth, async (req, res) => {
 router.post('/', auth, upload.single('images'), async (req, res) => {
   try {
     const donationData = {
-      type: req.body.type,
-      title: req.body.title,
-      description: req.body.description,
-      quantity: req.body.quantity,
-      foodType: req.body.foodType,
+      ...req.body,
       availability: JSON.parse(req.body.availability),
       location: JSON.parse(req.body.location),
       user: req.userId,
       userId: req.userId,
       donorName: req.user.name,
-      images: req.file ? [req.file.filename] : []
+      images: req.file ? [req.file.filename] : []  // Store just the filename
     };
 
     const donation = new Donation(donationData);

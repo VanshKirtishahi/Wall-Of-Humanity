@@ -4,10 +4,10 @@ import { toast } from 'react-toastify';
 import { format, isValid } from 'date-fns';
 import { FiEdit2, FiSave, FiX, FiCamera, FiUser, FiMail, FiPhone, FiMapPin, FiCalendar } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../../config/axios';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -32,25 +32,11 @@ const Profile = () => {
   `);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const fetchProfile = async () => {
       try {
-        setLoading(true); // Set loading at start
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile data');
-        }
-
-        const data = await response.json();
+        const response = await api.get('/auth/profile');
+        const data = response.data;
         setProfileData(data);
-        if (data.avatarUrl) {
-          setAvatarPreview(`http://localhost:5000${data.avatarUrl}`);
-        }
         setEditedData({
           name: data.name || '',
           email: data.email || '',
@@ -58,17 +44,23 @@ const Profile = () => {
           phone: data.phone || '',
           address: data.address || ''
         });
+        if (data.avatarUrl) {
+          setAvatarPreview(`${import.meta.env.VITE_API_URL}${data.avatarUrl}`);
+        }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        toast.error('Failed to load profile data');
-        setError(error.message);
+        setError('Failed to load profile');
+        if (error.response?.status === 401) {
+          logout();
+          navigate('/login');
+        }
       } finally {
-        setLoading(false); // Set loading to false regardless of success/failure
+        setLoading(false);
       }
     };
 
-    fetchProfileData();
-  }, []);
+    fetchProfile();
+  }, [navigate, logout]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -115,26 +107,15 @@ const Profile = () => {
         formData.append('avatar', avatar);
       }
 
-      const response = await api.put('/auth/profile/update', formData, {
+      const response = await api.put('/auth/profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      const updatedData = response.data;
-      
-      // Update context and local storage with new user data
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const updatedUser = { 
-        ...currentUser, 
-        ...updatedData,
-        token: currentUser.token // Preserve the token
-      };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      setProfileData(updatedData);
-      if (updatedData.avatarUrl) {
-        setAvatarPreview(`${import.meta.env.VITE_API_URL}${updatedData.avatarUrl}`);
+      setProfileData(response.data);
+      if (response.data.avatarUrl) {
+        setAvatarPreview(`${import.meta.env.VITE_API_URL}${response.data.avatarUrl}`);
       }
       setIsEditing(false);
       toast.success('Profile updated successfully!');
@@ -157,7 +138,7 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        await api.delete('/auth/profile/delete');
+        await api.delete('/auth/profile');
         localStorage.clear();
         logout();
         toast.success('Account deleted successfully');

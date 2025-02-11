@@ -28,7 +28,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   const getImageUrl = (imagePath) => {
     try {
       if (!imagePath) return DEFAULT_VENUE_IMAGE;
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '').replace(/\/$/, '');
       return `${baseUrl}/uploads/free-food/${imagePath}`;
     } catch (error) {
       console.error('Error processing venue image URL:', error);

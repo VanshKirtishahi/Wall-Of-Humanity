@@ -30,8 +30,8 @@ uploadDirs.forEach(dir => {
   }
 });
 
-// Single static file serving
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files - this should be AFTER directory creation
+app.use('/uploads', express.static('uploads'));
 
 // API Routes
 app.use('/api/auth', authRoutes);

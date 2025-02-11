@@ -98,7 +98,7 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
     try {
       if (!imagePath) return DEFAULT_DONATION_IMAGE;
       
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '').replace(/\/$/, '');
       if (Array.isArray(imagePath)) {
         return imagePath[0] ? `${baseUrl}/uploads/donations/${imagePath[0]}` : DEFAULT_DONATION_IMAGE;
       }

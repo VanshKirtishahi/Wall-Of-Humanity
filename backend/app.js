@@ -10,8 +10,13 @@ const fs = require('fs');
 
 const app = express();
 
-// Enable CORS before other middleware
-app.use(cors());
+// Configure CORS with specific origin
+app.use(cors({
+  origin: 'https://wall-of-humanity.vercel.app',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));

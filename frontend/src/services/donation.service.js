@@ -176,7 +176,8 @@ class DonationService {
         headers: {
           'Authorization': `Bearer ${user.token}`
         },
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       if (!response.ok) {

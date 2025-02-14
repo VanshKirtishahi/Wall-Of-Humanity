@@ -76,13 +76,15 @@ const FreeFoodCart = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">Free Food Available</h2>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <select
             value={selectedCity}
             onChange={(e) => setSelectedCity(e.target.value)}
-            className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-lg border-purple-300 shadow-sm 
+              focus:border-purple-500 focus:ring-purple-500 
+              hover:border-purple-400 transition-colors"
           >
-            <option value="" className="text-gray-700 font-medium">Select a City</option>
+            <option value="" className="text-gray-700 font-medium">All Cities</option>
             {availableCities.map(city => (
               <option key={city} value={city}>{city}</option>
             ))}
@@ -91,9 +93,12 @@ const FreeFoodCart = () => {
           {user && (
             <Link
               to="/free-food/new"
-              className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+              className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 text-white rounded-lg
+                hover:bg-purple-700 transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                shadow-lg shadow-purple-200 flex items-center justify-center"
             >
-              Add Free Food Listing
+              Add Free Food
             </Link>
           )}
         </div>

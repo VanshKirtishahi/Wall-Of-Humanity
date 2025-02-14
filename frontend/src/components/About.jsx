@@ -17,7 +17,6 @@ const About = () => {
       try {
         setLoading(true);
         const statsData = await donationService.getStats();
-        console.log('Received stats:', statsData);
         
         if (statsData) {
           setStats({

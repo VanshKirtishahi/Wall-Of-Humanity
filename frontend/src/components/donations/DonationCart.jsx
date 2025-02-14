@@ -81,14 +81,22 @@ const DonationCart = () => {
           </div>
 
           {/* Filters Section */}
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+          <div className="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Donations</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                  </svg>
+                  Type
+                </label>
                 <select
                   value={filters.type}
                   onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                  className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-gray-700"
+                  className="w-full px-4 py-2.5 rounded-lg border border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50
+                    hover:border-purple-400 transition-colors bg-white"
                 >
                   <option value="all">All Types</option>
                   <option value="Food">Food</option>
@@ -98,7 +106,7 @@ const DonationCart = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                   <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -109,7 +117,9 @@ const DonationCart = () => {
                 <select
                   value={filters.location}
                   onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-gray-700"
+                  className="w-full px-4 py-2.5 rounded-lg border border-purple-300 shadow-sm
+                    focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50
+                    hover:border-purple-400 transition-colors bg-white"
                 >
                   <option value="all">All Locations</option>
                   {uniqueLocations.map(location => (
@@ -117,21 +127,61 @@ const DonationCart = () => {
                   ))}
                 </select>
               </div>
+
+              <div className="lg:col-span-2 flex items-end">
+                <button 
+                  onClick={() => setFilters({type: 'all', location: 'all'})}
+                  className="px-4 py-2.5 text-purple-600 hover:text-purple-700 hover:bg-purple-50 
+                    rounded-lg transition-colors duration-200 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Reset Filters
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Donations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredDonations.map(donation => (
-              <DonationCard
-                key={donation._id}
-                donation={donation}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                isOwner={user?._id === donation.user}
+          {filteredDonations.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+              <img 
+                src="/images/NoDonation.jpg" 
+                alt="No donations" 
+                className="w-48 h-48 mx-auto mb-6" 
               />
-            ))}
-          </div>
+              <p className="text-gray-600 text-lg mb-6">
+                No donations available at the moment.
+              </p>
+              {user ? (
+                <Link
+                  to="/donation-form"
+                  className="text-purple-600 hover:text-purple-700 font-medium text-lg hover:underline"
+                >
+                  Be the first to make a donation
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-purple-600 hover:text-purple-700 font-medium text-lg hover:underline"
+                >
+                  Login to make a donation
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredDonations.map(donation => (
+                <DonationCard
+                  key={donation._id}
+                  donation={donation}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  isOwner={user?._id === donation.user}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -205,25 +205,32 @@ const FreeFoodForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 mt-16">
-      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-purple-100">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12 mt-16">
+      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl border border-purple-100">
         <h2 className="text-3xl font-bold text-purple-900 mb-8 text-center">
           {id ? 'Edit Free Food Listing' : 'Create Free Food Listing'}
         </h2>
         
         <div className="space-y-8">
           {/* Venue Information */}
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-purple-900 mb-4">Venue Information</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+            <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+              <span className="bg-purple-100 p-2 rounded-lg mr-2">📍</span>
+              Venue Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-purple-700">Venue Name</label>
+              <div className="group">
+                <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                  Venue Name
+                </label>
                 <input
                   type="text"
                   name="venue"
                   value={formData.venue}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
+                  className="block w-full rounded-lg border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                    hover:border-purple-400 transition-colors"
                   required
                   placeholder="Enter venue name"
                 />
@@ -259,8 +266,11 @@ const FreeFoodForm = () => {
           </div>
 
           {/* Location Information */}
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-purple-900 mb-4">Location Details</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+            <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+              <span className="bg-purple-100 p-2 rounded-lg mr-2">📌</span>
+              Location Details
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-purple-700">Street Address</label>
@@ -269,7 +279,9 @@ const FreeFoodForm = () => {
                   name="location.address"
                   value={formData.location.address}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  className="block w-full rounded-lg border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                    hover:border-purple-400 transition-colors"
                   required
                   placeholder="Enter street address"
                 />
@@ -282,7 +294,9 @@ const FreeFoodForm = () => {
                   name="location.area"
                   value={formData.location.area}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  className="block w-full rounded-lg border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                    hover:border-purple-400 transition-colors"
                   required
                   placeholder="Enter area or locality"
                 />
@@ -295,7 +309,9 @@ const FreeFoodForm = () => {
                   name="location.city"
                   value={formData.location.city}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  className="block w-full rounded-lg border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                    hover:border-purple-400 transition-colors"
                   required
                   placeholder="Enter city"
                 />
@@ -308,7 +324,9 @@ const FreeFoodForm = () => {
                   name="location.state"
                   value={formData.location.state}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  className="block w-full rounded-lg border-purple-300 shadow-sm 
+                    focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                    hover:border-purple-400 transition-colors"
                   required
                   placeholder="Enter state"
                 />
@@ -317,8 +335,11 @@ const FreeFoodForm = () => {
           </div>
 
           {/* Availability Section */}
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-purple-900 mb-4">Availability</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+            <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+              <span className="bg-purple-100 p-2 rounded-lg mr-2">🕒</span>
+              Availability
+            </h3>
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-purple-700">Availability Type</label>
@@ -378,43 +399,73 @@ const FreeFoodForm = () => {
           </div>
 
           {/* Image Upload Section */}
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-purple-900 mb-4">Venue Image</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+            <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+              <span className="bg-purple-100 p-2 rounded-lg mr-2">📸</span>
+              Venue Image
+            </h3>
             <div className="space-y-4">
-              <input
-                type="file"
-                onChange={handleImageChange}
-                accept="image/*"
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-purple-50 file:text-purple-700
-                  hover:file:bg-purple-100"
-              />
+              <div className="flex justify-center items-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-purple-300 border-dashed rounded-lg cursor-pointer hover:bg-purple-50 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-8 h-8 mb-4 text-purple-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p className="mb-2 text-sm text-purple-600">
+                      <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-purple-500">PNG, JPG or GIF (MAX. 5MB)</p>
+                  </div>
+                  <input 
+                    type="file"
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </label>
+              </div>
               {imagePreview && (
-                <div className="mt-2">
-                  <img src={imagePreview} alt="Preview" className="h-48 w-auto object-cover rounded-lg" />
+                <div className="mt-4">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="h-48 w-full object-cover rounded-lg shadow-md" 
+                  />
                 </div>
               )}
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end space-x-4 pt-4">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-6 py-2 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50"
+              className="px-6 py-2.5 border-2 border-purple-300 text-purple-700 rounded-lg
+                hover:bg-purple-50 hover:border-purple-400 transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              className="px-6 py-2.5 bg-purple-600 text-white rounded-lg
+                hover:bg-purple-700 disabled:opacity-50 transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                shadow-lg shadow-purple-200"
             >
-              {isLoading ? 'Saving...' : (id ? 'Update Listing' : 'Create Listing')}
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
+              ) : (
+                id ? 'Update Listing' : 'Create Listing'
+              )}
             </button>
           </div>
         </div>

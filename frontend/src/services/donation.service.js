@@ -161,7 +161,6 @@ class DonationService {
       }
 
       const data = await response.json();
-      console.log('Created donation:', data);
       return data;
     } catch (error) {
       console.error('Create donation error:', error);
@@ -171,8 +170,7 @@ class DonationService {
 
   async getStats() {
     try {
-      const response = await api.get('/donations/stats');
-      console.log('Stats response:', response.data);
+      const response = await api.get('/donations/stats'); 
       
       if (!response.data) {
         throw new Error('No data received');

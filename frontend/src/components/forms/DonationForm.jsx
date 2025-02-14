@@ -36,14 +36,9 @@ const DonationForm = () => {
   });
 
   const foodTypes = [
-    'Vegetables',
-    'Fruits',
     'Grains',
-    'Dairy',
-    'Meat',
     'Prepared Meals',
     'Packaged Food',
-    'Beverages',
     'Other'
   ];
 
@@ -175,9 +170,6 @@ const DonationForm = () => {
         response = await donationService.createDonationWithImage(formDataToSend);
       }
 
-      // Log the response to check the image path
-      console.log('Donation response:', response);
-
       toast.success(`Donation ${id ? 'updated' : 'created'} successfully!`);
       navigate('/my-donations');
     } catch (error) {
@@ -189,227 +181,264 @@ const DonationForm = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 mt-20 mb-20">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6">
-          {id ? 'Edit Donation' : 'Create New Donation'}
-        </h2>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12 mt-16">
+      <div className="max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl border border-purple-100">
+          <h2 className="text-3xl font-bold text-purple-900 mb-8 text-center">
+            {id ? 'Edit Donation' : 'Create New Donation'}
+          </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-gray-700 mb-2">Type of Donation</label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-              required
-            >
-              <option value="Food">Food</option>
-              <option value="Clothes">Clothes</option>
-              <option value="Books">Books</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-              rows="4"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Quantity</label>
-            <input
-              type="text"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-              required
-            />
-          </div>
-
-          {formData.type === 'Food' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Food Type
-              </label>
-              <select
-                name="foodType"
-                value={formData.foodType}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              >
-                <option value="">Select Food Type</option>
-                {foodTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {formData.type === 'Food' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Pickup Time Availability</h3>
-                <div className="tooltip" title="Specify when the food donation can be picked up">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              
-              <p className="text-sm text-gray-500 italic mb-4">
-                Please specify the time window when the food donation will be available for pickup
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">Start Time</label>
-                  <input
-                    type="time"
-                    name="availability.startTime"
-                    value={formData.availability.startTime}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">End Time</label>
-                  <input
-                    type="time"
-                    name="availability.endTime"
-                    value={formData.availability.endTime}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
+          <div className="space-y-8">
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">📦</span>
+                Basic Information
+              </h3>
+              <div>
+                <label className="block text-gray-700 mb-2">Type of Donation</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                >
+                  <option value="Food">Food</option>
+                  <option value="Clothes">Clothes</option>
+                  <option value="Books">Books</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">Additional Pickup Instructions</label>
-                <textarea
-                  name="availability.notes"
-                  value={formData.availability.notes}
+                <label className="block text-gray-700 mb-2">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
-                  placeholder="E.g., Please call 10 minutes before pickup, Ring doorbell upon arrival, etc."
                   className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  rows="2"
+                  required
                 />
               </div>
-            </div>
-          )}
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Location</h3>
-            <div>
-              <label className="block text-gray-700 mb-2">Address</label>
-              <input
-                type="text"
-                name="location.address"
-                value={formData.location.address}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Area</label>
-              <input
-                type="text"
-                name="location.area"
-                value={formData.location.area}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">City</label>
-              <input
-                type="text"
-                name="location.city"
-                value={formData.location.city}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">State</label>
-              <input
-                type="text"
-                name="location.state"
-                value={formData.location.state}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Upload Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="mt-1 block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-purple-50 file:text-purple-700
-                hover:file:bg-purple-100"
-            />
-            {imagePreview && (
-              <div className="mt-2">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="h-32 w-32 object-cover rounded-md"
+              <div>
+                <label className="block text-gray-700 mb-2">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  rows="4"
+                  required
                 />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">Quantity</label>
+                <input
+                  type="text"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+
+              {formData.type === 'Food' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Food Type
+                  </label>
+                  <select
+                    name="foodType"
+                    value={formData.foodType}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  >
+                    <option value="">Select Food Type</option>
+                    {foodTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {formData.type === 'Food' && (
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+                <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                  <span className="bg-purple-100 p-2 rounded-lg mr-2">🍽️</span>
+                  Food Details
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium">Pickup Time Availability</h3>
+                    <div className="tooltip" title="Specify when the food donation can be picked up">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-500 italic mb-4">
+                    Please specify the time window when the food donation will be available for pickup
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2">Start Time</label>
+                      <input
+                        type="time"
+                        name="availability.startTime"
+                        value={formData.availability.startTime}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2">End Time</label>
+                      <input
+                        type="time"
+                        name="availability.endTime"
+                        value={formData.availability.endTime}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">Additional Pickup Instructions</label>
+                    <textarea
+                      name="availability.notes"
+                      value={formData.availability.notes}
+                      onChange={handleChange}
+                      placeholder="E.g., Please call 10 minutes before pickup, Ring doorbell upon arrival, etc."
+                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      rows="2"
+                    />
+                  </div>
+                </div>
               </div>
             )}
-          </div>
 
-          <div className="flex gap-4 mt-6">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition duration-150 ease-in-out shadow-md"
-            >
-              {isLoading ? 'Processing...' : (id ? 'Update Donation' : 'Create Donation')}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/my-donations')}
-              className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-200 transition duration-150 ease-in-out shadow-md"
-            >
-              Cancel
-            </button>
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">📍</span>
+                Location Details
+              </h3>
+              <div>
+                <label className="block text-gray-700 mb-2">Address</label>
+                <input
+                  type="text"
+                  name="location.address"
+                  value={formData.location.address}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Area</label>
+                <input
+                  type="text"
+                  name="location.area"
+                  value={formData.location.area}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">City</label>
+                <input
+                  type="text"
+                  name="location.city"
+                  value={formData.location.city}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">State</label>
+                <input
+                  type="text"
+                  name="location.state"
+                  value={formData.location.state}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">📸</span>
+                Upload Images
+              </h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mt-1 block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-purple-50 file:text-purple-700
+                    hover:file:bg-purple-100"
+                />
+                {imagePreview && (
+                  <div className="mt-2">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="h-32 w-32 object-cover rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={() => navigate('/my-donations')}
+                className="px-6 py-2.5 border-2 border-purple-300 text-purple-700 rounded-lg
+                  hover:bg-purple-50 hover:border-purple-400 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-6 py-2.5 bg-purple-600 text-white rounded-lg
+                  hover:bg-purple-700 disabled:opacity-50 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                  shadow-lg shadow-purple-200"
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </span>
+                ) : (
+                  id ? 'Update Donation' : 'Create Donation'
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

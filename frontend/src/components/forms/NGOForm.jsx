@@ -145,271 +145,341 @@ const NGOForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-24 px-4 sm:px-6 lg:px-8 mt-16">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12 mt-16">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-purple-600 mb-2">NGO Registration</h1>
-          <p className="text-gray-600">
-            Join our platform to expand your reach and make a bigger impact
-          </p>
-        </div>
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl border border-purple-100">
+          <h2 className="text-3xl font-bold text-purple-900 mb-8 text-center">
+            NGO Registration
+          </h2>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 space-y-6">
-          {/* Organization Details Section */}
-          <div className="border-b border-gray-200 pb-6">
-            <h2 className="text-xl font-semibold text-purple-600 mb-4">Organization Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Organization Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="organizationName"
-                  value={formData.organizationName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
+          <div className="space-y-8">
+            {/* Organization Details */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">🏢</span>
+                Organization Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Organization Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="organizationName"
+                    value={formData.organizationName}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Organization Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="organizationEmail"
-                  value={formData.organizationEmail}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Person Section */}
-          <div className="border-b border-gray-200 pb-6">
-            <h2 className="text-xl font-semibold text-purple-600 mb-4">Contact Person Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Contact Person Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="contactPersonName"
-                  value={formData.contactPersonName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Contact Person Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="contactPersonEmail"
-                  value={formData.contactPersonEmail}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Contact Person Phone <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="contactPersonPhone"
-                  value={formData.contactPersonPhone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Organization Phone <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Organization Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="organizationEmail"
+                    value={formData.organizationEmail}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* NGO Details Section */}
-          <div className="border-b border-gray-200 pb-6">
-            <h2 className="text-xl font-semibold text-purple-600 mb-4">NGO Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  NGO Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="ngoType"
-                  value={formData.ngoType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="Orphanage">Orphanage</option>
-                  <option value="Old-Age Home">Old-Age Home</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+            {/* Contact Person Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">👤</span>
+                Contact Person Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Contact Person Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="contactPersonName"
+                    value={formData.contactPersonName}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Incorporation Date <span className="text-red-500">*</span>
-                </label>
-                <DatePicker
-                  selected={formData.incorporationDate}
-                  onChange={(date) => setFormData(prev => ({ ...prev, incorporationDate: date }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  dateFormat="dd/MM/yyyy"
-                />
-              </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Contact Person Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="contactPersonEmail"
+                    value={formData.contactPersonEmail}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-gray-700 font-medium mb-2">
-                  Address <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-            </div>
-          </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Contact Person Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="contactPersonPhone"
+                    value={formData.contactPersonPhone}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
 
-          {/* Additional Information Section */}
-          <div className="border-b border-gray-200 pb-6">
-            <h2 className="text-xl font-semibold text-purple-600 mb-4">Additional Information</h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">NGO Website</label>
-                <input
-                  type="url"
-                  name="ngoWebsite"
-                  value={formData.ngoWebsite}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="https://example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Social Media Links</label>
-                <input
-                  type="text"
-                  name="socialMediaLinks"
-                  value={formData.socialMediaLinks}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Comma-separated links"
-                />
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Organization Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Documents Section */}
-          <div className="border-b border-gray-200 pb-6">
-            <h2 className="text-xl font-semibold text-purple-600 mb-4">Required Documents</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  NGO Logo <span className="text-red-500">*</span>
-                  <span className="text-sm text-gray-500 block">
-                    (PDF, JPG, JPEG, PNG - Max 2MB)
+            {/* NGO Details Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">🏢</span>
+                NGO Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    NGO Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="ngoType"
+                    value={formData.ngoType}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Orphanage">Orphanage</option>
+                    <option value="Old-Age Home">Old-Age Home</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Incorporation Date <span className="text-red-500">*</span>
+                  </label>
+                  <DatePicker
+                    selected={formData.incorporationDate}
+                    onChange={(date) => setFormData(prev => ({ ...prev, incorporationDate: date }))}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    dateFormat="dd/MM/yyyy"
+                  />
+                </div>
+
+                <div className="md:col-span-2 group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    rows="3"
+                    required
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Information Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">🌐</span>
+                Additional Information
+              </h3>
+              <div className="space-y-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    NGO Website
+                  </label>
+                  <input
+                    type="url"
+                    name="ngoWebsite"
+                    value={formData.ngoWebsite}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Social Media Links
+                  </label>
+                  <input
+                    type="text"
+                    name="socialMediaLinks"
+                    value={formData.socialMediaLinks}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    placeholder="Comma-separated links"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Documents Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">📄</span>
+                Required Documents
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    NGO Logo <span className="text-red-500">*</span>
+                    <span className="text-sm text-gray-500 block">
+                      (PDF, JPG, JPEG, PNG - Max 2MB)
+                    </span>
+                  </label>
+                  <input
+                    type="file"
+                    name="logo"
+                    onChange={handleChange}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Certification Document <span className="text-red-500">*</span>
+                    <span className="text-sm text-gray-500 block">
+                      (PDF, JPG, JPEG, PNG - Max 2MB)
+                    </span>
+                  </label>
+                  <input
+                    type="file"
+                    name="certification"
+                    onChange={handleChange}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">📝</span>
+                Terms and Conditions
+              </h3>
+              <div className="space-y-4">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    name="socialPosts"
+                    checked={formData.socialPosts}
+                    onChange={handleChange}
+                    className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <span className="text-gray-700">Allow social media posts about our work</span>
+                </label>
+
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    name="termsAccepted"
+                    checked={formData.termsAccepted}
+                    onChange={handleChange}
+                    className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    required
+                  />
+                  <span className="text-gray-700">
+                    I accept the terms and conditions <span className="text-red-500">*</span>
                   </span>
                 </label>
-                <input
-                  type="file"
-                  name="logo"
-                  onChange={handleChange}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Certification Document <span className="text-red-500">*</span>
-                  <span className="text-sm text-gray-500 block">
-                    (PDF, JPG, JPEG, PNG - Max 2MB)
-                  </span>
-                </label>
-                <input
-                  type="file"
-                  name="certification"
-                  onChange={handleChange}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  required
-                />
               </div>
             </div>
-          </div>
 
-          {/* Terms and Conditions */}
-          <div className="space-y-4">
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                name="socialPosts"
-                checked={formData.socialPosts}
-                onChange={handleChange}
-                className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              />
-              <span className="text-gray-700">Allow social media posts about our work</span>
-            </label>
-
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                name="termsAccepted"
-                checked={formData.termsAccepted}
-                onChange={handleChange}
-                className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                required
-              />
-              <span className="text-gray-700">
-                I accept the terms and conditions <span className="text-red-500">*</span>
-              </span>
-            </label>
-          </div>
-
-          <div className="flex justify-center pt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold
-                hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-                transition-colors duration-300
-                ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Registration'}
-            </button>
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="px-6 py-2.5 border-2 border-purple-300 text-purple-700 rounded-lg
+                  hover:bg-purple-50 hover:border-purple-400 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 bg-purple-600 text-white rounded-lg
+                  hover:bg-purple-700 disabled:opacity-50 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                  shadow-lg shadow-purple-200"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit Registration'
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

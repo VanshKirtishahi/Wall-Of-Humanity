@@ -200,13 +200,13 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
             <div className="flex justify-between gap-2">
               <button
                 onClick={handleRequestClick}
-                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
               >
                 Request
               </button>
               <button
                 onClick={() => handleGetLocation(donation.location)}
-                className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                className="flex-1 border-2 border-purple-600 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
               >
                 Get Location
               </button>

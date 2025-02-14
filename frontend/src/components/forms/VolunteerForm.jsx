@@ -87,121 +87,169 @@ const VolunteerForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-24 px-4 sm:px-6 lg:px-8 mt-16">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12 mt-16">
       <div className="max-w-4xl mx-auto">
-        <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-3xl font-bold text-center mb-8 text-purple-600">Volunteer Registration</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">Full Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-              />
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl border border-purple-100">
+          <h2 className="text-3xl font-bold text-purple-900 mb-8 text-center">
+            Volunteer Registration
+          </h2>
+
+          <div className="space-y-8">
+            {/* Personal Information */}
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
+                <span className="bg-purple-100 p-2 rounded-lg mr-2">👤</span>
+                Personal Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    rows="3"
+                    required
+                  ></textarea>
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Availability <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="availability"
+                    value={formData.availability}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    required
+                  >
+                    <option value="">Select availability</option>
+                    <option value="weekdays">Weekdays</option>
+                    <option value="weekends">Weekends</option>
+                    <option value="both">Both</option>
+                    <option value="flexible">Flexible</option>
+                  </select>
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Areas of Interest <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="interests"
+                    value={formData.interests}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    rows="3"
+                    placeholder="What areas would you like to help with?"
+                    required
+                  ></textarea>
+                </div>
+                <div className="group">
+                  <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
+                    Previous Volunteer Experience
+                  </label>
+                  <textarea
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    className="block w-full rounded-lg border-purple-300 shadow-sm 
+                      focus:border-purple-500 focus:ring-purple-500 px-4 py-2.5
+                      hover:border-purple-400 transition-colors"
+                    rows="3"
+                    placeholder="Tell us about your previous volunteer experience (if any)"
+                  ></textarea>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">Phone Number</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-gray-700 font-semibold mb-2">Address</label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div>
-              <label htmlFor="availability" className="block text-gray-700 font-semibold mb-2">Availability</label>
-              <select
-                id="availability"
-                name="availability"
-                value={formData.availability}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="px-6 py-2.5 border-2 border-purple-300 text-purple-700 rounded-lg
+                  hover:bg-purple-50 hover:border-purple-400 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                <option value="">Select availability</option>
-                <option value="weekdays">Weekdays</option>
-                <option value="weekends">Weekends</option>
-                <option value="both">Both</option>
-                <option value="flexible">Flexible</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="interests" className="block text-gray-700 font-semibold mb-2">Areas of Interest</label>
-              <textarea
-                id="interests"
-                name="interests"
-                value={formData.interests}
-                onChange={handleChange}
-                placeholder="What areas would you like to help with?"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div>
-              <label htmlFor="experience" className="block text-gray-700 font-semibold mb-2">Previous Volunteer Experience</label>
-              <textarea
-                id="experience"
-                name="experience"
-                value={formData.experience}
-                onChange={handleChange}
-                placeholder="Tell us about your previous volunteer experience (if any)"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
-                rows="3"
-              ></textarea>
-            </div>
-
-            <div className="flex justify-center">
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`bg-purple-600 text-white px-8 py-3 rounded-lg transition-colors duration-300 
-                  ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700'}`}
+                className="px-6 py-2.5 bg-purple-600 text-white rounded-lg
+                  hover:bg-purple-700 disabled:opacity-50 transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                  shadow-lg shadow-purple-200"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit Application'
+                )}
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );

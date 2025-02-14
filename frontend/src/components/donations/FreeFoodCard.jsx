@@ -71,6 +71,10 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
     );
   };
 
+  const handleImageError = (e) => {
+    e.target.src = DEFAULT_VENUE_IMAGE;
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
       {/* Card Image with Gradient Overlay */}
@@ -79,13 +83,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
           src={getImageUrl(freeFood.venueImage)}
           alt={freeFood.venue}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            console.error('Image load error for:', freeFood.venue);
-            console.error('Attempted URL:', e.target.src);
-            console.error('Image path:', freeFood.venueImage);
-            e.target.onerror = null;
-            e.target.src = DEFAULT_VENUE_IMAGE;
-          }}
+          onError={handleImageError}
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/50" />
         <div className="absolute top-4 right-4">

@@ -8,7 +8,7 @@ const WhoWeAre = () => {
           {/* Image Section */}
           <div className="relative">
             <img
-              src="/images/team/Team.jpeg"  // Direct path to image in public folder
+              src="/images/team/"  // Direct path to image in public folder
               alt="Support Team"
               className="rounded-lg shadow-xl w-full h-auto"
               loading="lazy"

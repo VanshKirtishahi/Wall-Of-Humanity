@@ -78,13 +78,14 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`http://localhost:5000/api/donations/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/donations/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Accept': 'application/json'
         },
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       if (!response.ok) {

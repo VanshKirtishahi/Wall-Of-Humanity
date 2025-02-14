@@ -41,34 +41,8 @@ class DonationService {
 
   async getDonationById(id) {
     try {
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        throw new Error('Authentication required');
-      }
-
-      const user = JSON.parse(userData);
-      if (!user.token) {
-        localStorage.removeItem('user');
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch(`http://localhost:5000/api/donations/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      });
-
-      if (response.status === 401) {
-        localStorage.removeItem('user');
-        throw new Error('Authentication required');
-      }
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch donation');
-      }
-
-      return data;
+      const response = await api.get(`/donations/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Get donation error:', error);
       throw error;

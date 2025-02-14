@@ -28,8 +28,9 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
   const getImageUrl = (imagePath) => {
     try {
       if (!imagePath) return DEFAULT_VENUE_IMAGE;
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '').replace(/\/$/, '');
-      return `${baseUrl}/uploads/free-food/${imagePath}`;
+      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+      const filename = imagePath.replace(/\s+/g, '-');
+      return `${baseUrl}/uploads/free-food/${filename}`;
     } catch (error) {
       console.error('Error processing venue image URL:', error);
       return DEFAULT_VENUE_IMAGE;
@@ -76,7 +77,7 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
       <div className="relative h-56">
         <img
           src={getImageUrl(freeFood.venueImage)}
-          alt={freeFood.venue || 'Venue'}
+          alt={freeFood.venue}
           className="w-full h-full object-cover"
           onError={(e) => {
             console.error('Image load error for:', freeFood.venue);

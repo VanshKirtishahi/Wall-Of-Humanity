@@ -96,7 +96,6 @@ const RequestForm = () => {
       };
 
       const response = await requestService.createRequest(requestData);
-      console.log("Request created:", response);
 
       // Then send email notification
       const emailResponse = await fetch('http://localhost:5000/api/email/send-email', {

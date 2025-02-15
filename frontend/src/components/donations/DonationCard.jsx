@@ -42,11 +42,24 @@ const DonationCard = ({ donation, onDelete, onEdit, isMyDonation = false }) => {
   };
 
   const handleGetLocation = () => {
-    if (donation.location && donation.location.coordinates) {
-      const [lng, lat] = donation.location.coordinates;
-      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+    if (!donation.location) {
+      toast.error('Location information is not available');
+      return;
+    }
+
+    const { coordinates } = donation.location;
+    
+    if (coordinates?.lat && coordinates?.lng) {
+      const mapUrl = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`;
+      window.open(mapUrl, '_blank');
     } else {
-      toast.error('Location not available for this donation');
+      const address = formatFullAddress(donation.location);
+      if (address) {
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+        window.open(mapUrl, '_blank');
+      } else {
+        toast.error('Location information is not available');
+      }
     }
   };
 

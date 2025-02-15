@@ -98,33 +98,34 @@ const RequestForm = () => {
       const response = await requestService.createRequest(requestData);
 
       // Then send email notification
-      const emailResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-email`, {
+      const emailData = {
+        name: formData.requestorName,
+        email: formData.email || user.email,
+        message: `
+          <h2>New Donation Request</h2>
+          <h3>Donation Details:</h3>
+          <p>Title: ${donation?.title}</p>
+          <p>Type: ${donation?.type}</p>
+          <p>Description: ${donation?.description}</p>
+
+          <h3>Requester Details:</h3>
+          <p>Name: ${formData.requestorName}</p>
+          <p>Contact: ${formData.contactNumber}</p>
+          <p>Address: ${formData.address}</p>
+
+          <h3>Request Details:</h3>
+          <p>Reason: ${formData.reason}</p>
+          <p>Quantity Needed: ${formData.quantity}</p>
+          <p>Urgency Level: ${formData.urgency}</p>
+        `
+      };
+
+      const emailResponse = await fetch(`${import.meta.env.VITE_API_URL}/email/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify({
-          name: formData.requestorName,
-          email: formData.email || user.email,
-          message: `
-            <h2>New Donation Request</h2>
-            <h3>Donation Details:</h3>
-            <p>Title: ${donation?.title}</p>
-            <p>Type: ${donation?.type}</p>
-            <p>Description: ${donation?.description}</p>
-
-            <h3>Requester Details:</h3>
-            <p>Name: ${formData.requestorName}</p>
-            <p>Contact: ${formData.contactNumber}</p>
-            <p>Address: ${formData.address}</p>
-
-            <h3>Request Details:</h3>
-            <p>Reason: ${formData.reason}</p>
-            <p>Quantity Needed: ${formData.quantity}</p>
-            <p>Urgency Level: ${formData.urgency}</p>
-          `
-        })
+        body: JSON.stringify(emailData),
       });
 
       if (!emailResponse.ok) {

@@ -98,7 +98,7 @@ const RequestForm = () => {
       const response = await requestService.createRequest(requestData);
 
       // Then send email notification
-      const emailResponse = await fetch('http://localhost:5000/api/email/send-email', {
+      const emailResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

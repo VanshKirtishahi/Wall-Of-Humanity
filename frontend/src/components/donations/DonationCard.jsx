@@ -100,15 +100,9 @@ const DonationCard = ({ donation, onDelete, onEdit, isMyDonation = false }) => {
       const backendUrl = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000';
       const imagePathToUse = Array.isArray(imagePath) ? imagePath[0] : imagePath;
       
-      // Add error logging
-      console.log('Backend URL:', backendUrl);
-      console.log('Image Path:', imagePathToUse);
-      
       // Ensure the path is properly formatted
       const formattedPath = imagePathToUse.replace(/\\/g, '/');
       const imageUrl = `${backendUrl}/uploads/donations/${formattedPath}`;
-      
-      console.log('Full Image URL:', imageUrl);
       return imageUrl;
     } catch (error) {
       console.error('Error processing image URL:', error);

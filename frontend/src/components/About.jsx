@@ -90,7 +90,7 @@ const About = () => {
     },
     {
       name: "Varad Gotkhindkar",
-      role: "Community Manager",
+      role: "Research & Development",
       description: "Creating responsive and intuitive user interfaces"
     },
     {
@@ -258,7 +258,7 @@ const About = () => {
                 />
               </div>
               <h3 className="text-xl font-semibold text-gray-900">Vansh Kirtishahi</h3>
-              <p className="text-purple-600">Founder & CEO</p>
+              <p className="text-purple-600">Team Lead & Full Stack Developer</p>
             </div>
             <div className="text-center">
               <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
@@ -275,7 +275,7 @@ const About = () => {
               <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
                 <img
                   src="/images/team/Adinath.jpeg" // image takaychi ahe 
-                  alt="Adinath - Community Manager"
+                  alt="Adinath - Backend Developer"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -286,12 +286,12 @@ const About = () => {
               <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
                 <img
                   src="/images/team/varad.jpeg"
-                  alt="Vedant - Backend Developer"
+                  alt="varad - Research & Development"
                   className="w-full h-full object-cover object-top"
                 />
               </div>
               <h3 className="text-xl font-semibold text-gray-900">Varad Gotkhindkar</h3>
-              <p className="text-purple-600">Community Manager</p>
+              <p className="text-purple-600">Research & Development</p>
             </div>
           </div>
         </div>

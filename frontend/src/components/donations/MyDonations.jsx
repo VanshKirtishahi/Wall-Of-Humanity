@@ -140,12 +140,12 @@ const MyDonations = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {donations.map((donation) => (
-              <DonationCard
+              <DonationCard 
                 key={donation._id}
                 donation={donation}
-                onEdit={() => handleEdit(donation._id)}
-                onDelete={() => handleDelete(donation._id)}
-                isOwner={true}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isMyDonation={true}
               />
             ))}
           </div>

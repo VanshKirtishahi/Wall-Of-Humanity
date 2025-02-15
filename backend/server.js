@@ -77,7 +77,14 @@ if (!fs.existsSync(uploadsDir)){
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Serve static files from uploads directory
+// Add logging middleware
+app.use('/uploads', (req, res, next) => {
+  console.log('Static file request:', req.path);
+  console.log('Full path:', path.join(__dirname, 'uploads', req.path));
+  next();
+});
+
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const freeFoodUploadsDir = path.join(__dirname, 'uploads', 'free-food');

@@ -5,15 +5,15 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { DEFAULT_DONATION_IMAGE } from '../../constants/images';
 
-const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => {
-  const { isAuthenticated } = useAuth();
+const DonationCard = ({ donation, onDelete, onEdit, isMyDonation = false }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   const getDistanceText = () => {
-    if (!userLocation || !donation.coordinates) return '';
-    const distance = calculateDistance(userLocation, donation.coordinates);
+    if (!location || !donation.coordinates) return '';
+    const distance = calculateDistance(location, donation.coordinates);
     return formatDistance(distance);
   };
 
@@ -41,21 +41,12 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
     return [address, area, city, state].filter(Boolean).join(', ');
   };
 
-  const handleRequest = (donationId) => {
-    // Implement request logic here
-    console.log('Requesting donation:', donationId);
-    // You might want to navigate to a request form or open a modal
-  };
-
-  const handleGetLocation = (location) => {
-    // Implement location handling logic here
-    if (location?.coordinates) {
-      // Open in Google Maps if coordinates are available
-      window.open(`https://www.google.com/maps?q=${location.coordinates[1]},${location.coordinates[0]}`, '_blank');
-    } else if (location?.address) {
-      // Open address in Google Maps
-      const searchQuery = encodeURIComponent(`${location.address}, ${location.area}, ${location.city}, ${location.state}`);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${searchQuery}`, '_blank');
+  const handleGetLocation = () => {
+    if (donation.location && donation.location.coordinates) {
+      const [lng, lat] = donation.location.coordinates;
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+    } else {
+      toast.error('Location not available for this donation');
     }
   };
 
@@ -96,14 +87,29 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
 
   const getImageUrl = (imagePath) => {
     try {
-      if (!imagePath) return DEFAULT_DONATION_IMAGE;
-      
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
-      if (Array.isArray(imagePath)) {
-        if (!imagePath[0]) return DEFAULT_DONATION_IMAGE;
-        return `${baseUrl}/uploads/donations/${imagePath[0]}`;
+      if (!imagePath || (Array.isArray(imagePath) && !imagePath.length)) {
+        return DEFAULT_DONATION_IMAGE;
       }
-      return `${baseUrl}/uploads/donations/${imagePath}`;
+      
+      // Check if the image path is already a full URL
+      if (typeof imagePath === 'string' && imagePath.startsWith('http')) {
+        return imagePath;
+      }
+
+      // Get the backend URL from environment variables
+      const backendUrl = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000';
+      const imagePathToUse = Array.isArray(imagePath) ? imagePath[0] : imagePath;
+      
+      // Add error logging
+      console.log('Backend URL:', backendUrl);
+      console.log('Image Path:', imagePathToUse);
+      
+      // Ensure the path is properly formatted
+      const formattedPath = imagePathToUse.replace(/\\/g, '/');
+      const imageUrl = `${backendUrl}/uploads/donations/${formattedPath}`;
+      
+      console.log('Full Image URL:', imageUrl);
+      return imageUrl;
     } catch (error) {
       console.error('Error processing image URL:', error);
       return DEFAULT_DONATION_IMAGE;
@@ -119,9 +125,6 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
           alt={donation.title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            console.error('Image load error for:', donation.title);
-            console.error('Attempted URL:', e.target.src);
-            console.error('Image path:', donation.images);
             e.target.onerror = null;
             e.target.src = DEFAULT_DONATION_IMAGE;
           }}
@@ -180,40 +183,44 @@ const DonationCard = ({ donation, onEdit, onDelete, isOwner, userLocation }) => 
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-4">
-          {isOwner ? (
-            <div className="flex gap-2">
+        <div className="p-4 flex justify-end gap-2">
+          {isMyDonation ? (
+            // Show edit and delete buttons only in My Donations
+            <>
               <button
                 onClick={() => onEdit(donation._id)}
-                className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
               >
                 Edit
               </button>
               <button
                 onClick={() => onDelete(donation._id)}
-                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
               >
                 Delete
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex justify-between gap-2">
+            // Show request and location buttons in general donation cart
+            <>
               <button
                 onClick={handleRequestClick}
-                className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
               >
                 Request
               </button>
               <button
-                onClick={() => handleGetLocation(donation.location)}
-                className="flex-1 border-2 border-purple-600 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+                onClick={handleGetLocation}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
               >
                 Get Location
               </button>
-            </div>
+            </>
           )}
         </div>
       </div>
+
+      {/* Login Prompt Dialog */}
       {showLoginPrompt && <LoginPrompt />}
     </div>
   );

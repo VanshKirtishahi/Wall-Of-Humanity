@@ -63,8 +63,8 @@ const DonationCart = () => {
   return (
     <div className="bg-gray-50 py-8">
       {isLoading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
         </div>
       ) : (
         <div className="container mx-auto px-4">
@@ -175,9 +175,7 @@ const DonationCart = () => {
                 <DonationCard
                   key={donation._id}
                   donation={donation}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  isOwner={user?._id === donation.user}
+                  isMyDonation={false}
                 />
               ))}
             </div>

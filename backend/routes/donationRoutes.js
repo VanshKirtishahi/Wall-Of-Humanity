@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const upload = require('../config/multer');
 const Donation = require('../models/Donation');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -11,27 +11,6 @@ const User = require('../models/User');
 const NGO = require('../models/NGO');
 const Volunteer = require('../models/Volunteer');
 const Request = require('../models/Request');
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../uploads/donations');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '-'));
-  }
-});
-
-const uploadMulter = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
 
 // Get all donations
 router.get('/', async (req, res) => {
@@ -142,7 +121,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Update donation
-router.put('/:id', auth, uploadMulter.single('images'), async (req, res) => {
+router.put('/:id', auth, upload.single('images'), async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
     if (!donation) {

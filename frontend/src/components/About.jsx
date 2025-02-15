@@ -274,7 +274,7 @@ const About = () => {
             <div className="text-center">
               <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
                 <img
-                  src="/images/team/Adinath.jpeg" // image takaychi ahe 
+                  src="/images/team/Adinath.jpeg" 
                   alt="Adinath - Backend Developer"
                   className="w-full h-full object-cover"
                 />

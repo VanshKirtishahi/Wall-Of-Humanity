@@ -113,10 +113,8 @@ const FreeFoodCart = () => {
           <FreeFoodCard
             key={listing._id}
             freeFood={listing}
-            isOwner={user?._id === listing.uploadedBy}
-            onEdit={() => navigate(`/free-food/edit/${listing._id}`)}
-            onDelete={() => handleDelete(listing._id)}
-            showEditDelete={false}
+            showControls={true}
+            isListing={false}
           />
         ))}
       </div>

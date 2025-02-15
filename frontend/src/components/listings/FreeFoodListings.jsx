@@ -101,13 +101,15 @@ const FreeFoodListings = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {listings.map(listing => (
+            {listings.map((listing) => (
               <FreeFoodCard
                 key={listing._id}
                 freeFood={listing}
                 isOwner={listing.uploadedBy === user?._id}
-                onEdit={() => handleEdit(listing._id)}
-                onDelete={() => handleDelete(listing._id)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                showControls={true}
+                isListing={true}
               />
             ))}
           </div>

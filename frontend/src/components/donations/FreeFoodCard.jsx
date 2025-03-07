@@ -4,6 +4,63 @@ import { toast } from 'react-toastify';
 import { DEFAULT_VENUE_IMAGE } from '../../constants/images';
 
 const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true, isListing = false }) => {
+  const formatAvailability = () => {
+    const { availability } = freeFood;
+    if (!availability) return 'Not specified';
+
+    const formatTimeWithPeriod = (timeString) => {
+      if (!timeString) return 'Not specified';
+      
+      if (typeof timeString === 'object' && timeString.hours && timeString.minutes && timeString.period) {
+        return `${timeString.hours}:${timeString.minutes} ${timeString.period}`;
+      }
+      
+      try {
+        const [hours, minutes] = timeString.split(':');
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${period}`;
+      } catch (error) {
+        return 'Not specified';
+      }
+    };
+
+    const getAvailabilityTypeText = (type) => {
+      switch (type) {
+        case 'weekdays': return 'Weekdays (Mon-Fri)';
+        case 'weekend': return 'Weekend (Sat-Sun)';
+        case 'allDays': return 'All Days';
+        case 'specific': return 'Specific Date';
+        default: return type;
+      }
+    };
+
+    const startTime = formatTimeWithPeriod(availability.startTime);
+    const endTime = formatTimeWithPeriod(availability.endTime);
+    const timeRange = `${startTime} - ${endTime}`;
+
+    if (availability.type === 'specific') {
+      const date = availability.specificDate ? 
+        new Date(availability.specificDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : 'Date not specified';
+      return `${date}, ${timeRange}`;
+    } else {
+      return `${getAvailabilityTypeText(availability.type)}, ${timeRange}`;
+    }
+  };
+
+  const formatCreatedDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   const handleGetLocation = () => {
     // Get coordinates from the location object
     const { coordinates } = freeFood.location || {};
@@ -27,74 +84,39 @@ const FreeFoodCard = ({ freeFood, isOwner, onEdit, onDelete, showControls = true
 
   const getImageUrl = (imagePath) => {
     try {
-      if (!imagePath) return DEFAULT_VENUE_IMAGE;
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
-      const filename = imagePath.replace(/\s+/g, '-');
-      return `${baseUrl}/uploads/free-food/${filename}`;
+      if (!imagePath) {
+        return DEFAULT_VENUE_IMAGE;
+      }
+      
+      // Return the Cloudinary URL directly
+      return imagePath;
     } catch (error) {
-      console.error('Error processing venue image URL:', error);
+      console.error('Error processing image URL:', error);
       return DEFAULT_VENUE_IMAGE;
     }
   };
-
-  const formatAvailability = () => {
-    const { type, startTime, endTime, specificDate } = freeFood.availability || {};
-    
-    let availabilityText = '';
-    switch (type) {
-      case 'specific':
-        const date = specificDate ? new Date(specificDate).toLocaleDateString() : 'Not specified';
-        availabilityText = `${date}`;
-        break;
-      case 'weekdays':
-        availabilityText = 'Every Weekday (Mon-Fri)';
-        break;
-      case 'weekend':
-        availabilityText = 'Every Weekend (Sat-Sun)';
-        break;
-      case 'allDays':
-        availabilityText = 'All Days';
-        break;
-      default:
-        availabilityText = 'Schedule not specified';
-    }
-
-    return (
-      <div className="flex flex-col">
-        <span className="text-sm font-medium">{availabilityText}</span>
-        {startTime && endTime && (
-          <span className="text-sm">
-            {startTime} - {endTime}
-          </span>
-        )}
-      </div>
-    );
-  };
-
-  const handleImageError = (e) => {
-    e.target.src = DEFAULT_VENUE_IMAGE;
-  };
-
+  
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
-      {/* Card Image with Gradient Overlay */}
-      <div className="relative h-56">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="relative h-48">
         <img
           src={getImageUrl(freeFood.venueImage)}
           alt={freeFood.venue}
           className="w-full h-full object-cover"
-          onError={handleImageError}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = DEFAULT_VENUE_IMAGE;
+          }}
         />
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/50" />
-        <div className="absolute top-4 right-4">
-          <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-            {freeFood.foodType}
-          </span>
-        </div>
       </div>
 
       {/* Card Content */}
       <div className="p-4">
+        {/* Created Date */}
+        <div className="text-xs text-gray-500 mb-2">
+          <strong>Posted on:</strong> {formatCreatedDate(freeFood.createdAt)}
+        </div>
+
         <h3 className="text-xl font-semibold mb-2">{freeFood.venue}</h3>
         {freeFood.organizedBy && (
           <div className="text-sm text-gray-600 mb-2">

@@ -78,23 +78,10 @@ const MyDonations = () => {
       try {
         await donationService.deleteDonation(donationId);
         setDonations(donations.filter(d => d._id !== donationId));
-        toast.success('Donation deleted successfully', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.success('Donation deleted successfully');
       } catch (error) {
-        toast.error('Failed to delete donation', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        console.error('Delete error:', error);
+        toast.error('Failed to delete donation');
       }
     }
   };

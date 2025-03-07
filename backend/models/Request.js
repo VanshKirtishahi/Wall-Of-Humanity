@@ -27,10 +27,6 @@ const requestSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  quantity: {
-    type: String,
-    required: true
-  },
   urgency: {
     type: String,
     enum: ['normal', 'urgent', 'emergency'],

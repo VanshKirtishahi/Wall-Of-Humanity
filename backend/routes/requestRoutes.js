@@ -2,49 +2,93 @@ const express = require('express');
 const router = express.Router();
 const Request = require('../models/Request');
 const auth = require('../middleware/auth');
+const Donation = require('../models/Donation');
 
-// Create a new request
+// Create new request
 router.post('/', auth, async (req, res) => {
   try {
+    console.log('Request body:', req.body);
+    const { 
+      donation,
+      requestorName,
+      contactNumber,
+      address,
+      reason,
+      urgency,
+      status
+    } = req.body;
+
     // Validate required fields
-    const requiredFields = ['donation', 'requestorName', 'contactNumber', 'address', 'reason', 'quantity', 'urgency'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-    
-    if (missingFields.length > 0) {
+    if (!donation) {
       return res.status(400).json({ 
-        message: `Missing required fields: ${missingFields.join(', ')}`
+        message: 'Donation ID is required',
+        receivedData: req.body 
       });
     }
 
-    // Create request object
+    // Find the donation
+    const donationDoc = await Donation.findById(donation);
+    if (!donationDoc) {
+      return res.status(404).json({ 
+        message: 'Donation not found',
+        donationId: donation 
+      });
+    }
+
+    // Check if donation is already requested
+    if (donationDoc.status === 'requested') {
+      return res.status(400).json({ 
+        message: 'This donation has already been requested',
+        currentStatus: donationDoc.status 
+      });
+    }
+
+    // Create new request with quantity from donation if not provided
     const request = new Request({
-      ...req.body,
-      user: req.user.id,
-      status: 'pending'
+      donation,
+      user: req.userId,
+      requestorName,
+      contactNumber,
+      address,
+      reason,
+      urgency: urgency || 'normal',
+      status: status || 'pending'
     });
 
-    // Save request
-    const savedRequest = await request.save();
-    
-    // Populate user and donation details
-    await savedRequest.populate('user', 'name email');
-    await savedRequest.populate('donation');
-    
-    res.status(201).json(savedRequest);
+    await request.save();
+
+    // Update donation status
+    donationDoc.status = 'requested';
+    await donationDoc.save();
+
+    res.status(201).json({
+      request,
+      message: 'Request submitted successfully',
+      donationStatus: donationDoc.status
+    });
   } catch (error) {
-    console.error('Server error:', error); // Add server-side logging
-    res.status(400).json({ 
-      message: error.message,
-      details: error.errors // Include mongoose validation errors if any
+    console.error('Create request error:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+      userId: req.userId
+    });
+    
+    res.status(400).json({
+      message: 'Failed to create request',
+      error: error.message,
+      details: {
+        receivedData: req.body,
+        errorName: error.name
+      }
     });
   }
 });
 
-// Get all requests for a specific donation
-router.get('/donation/:donationId', auth, async (req, res) => {
+// Get all requests for a user
+router.get('/my-requests', auth, async (req, res) => {
   try {
-    const requests = await Request.find({ donation: req.params.donationId })
-      .populate('user', 'name email')
+    const requests = await Request.find({ user: req.userId })
       .populate('donation')
       .sort({ createdAt: -1 });
     res.json(requests);
@@ -53,11 +97,11 @@ router.get('/donation/:donationId', auth, async (req, res) => {
   }
 });
 
-// Get user's requests
-router.get('/my-requests', auth, async (req, res) => {
+// Get requests for a specific donation
+router.get('/donation/:donationId', auth, async (req, res) => {
   try {
-    const requests = await Request.find({ user: req.user.id })
-      .populate('donation')
+    const requests = await Request.find({ donation: req.params.donationId })
+      .populate('user', 'name email')
       .sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {

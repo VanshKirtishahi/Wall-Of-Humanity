@@ -9,10 +9,9 @@ import Swal from 'sweetalert2';
 
 const NGOForm = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { register } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [certificationPreview, setCertificationPreview] = useState(null);
   const [formData, setFormData] = useState({
     organizationName: '',
     organizationEmail: '',
@@ -48,9 +47,22 @@ const NGOForm = () => {
         // Check file type
         const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
         if (!allowedTypes.includes(file.type)) {
-          toast.error('File type must be PDF, JPG, or PNG');
+          toast.error('File type must be JPEG, JPG, or PNG');
           e.target.value = '';
           return;
+        }
+
+        // Preview for images
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (name === 'logo') {
+              setLogoPreview(reader.result);
+            } else if (name === 'certification') {
+              setCertificationPreview(reader.result);
+            }
+          };
+          reader.readAsDataURL(file);
         }
       }
     }
@@ -95,9 +107,30 @@ const NGOForm = () => {
 
     try {
       setIsSubmitting(true);
-      toast.info('Submitting your NGO registration...');
+
+      // Create FormData object
+      const formDataToSend = new FormData();
       
-      const response = await ngoService.registerNGO(formData);
+      // Append all text fields
+      Object.keys(formData).forEach(key => {
+        if (key !== 'logo' && key !== 'certification' && formData[key] !== null) {
+          if (key === 'incorporationDate') {
+            formDataToSend.append(key, formData[key].toISOString());
+          } else {
+            formDataToSend.append(key, formData[key]);
+          }
+        }
+      });
+
+      // Append files
+      if (formData.logo) {
+        formDataToSend.append('logo', formData.logo);
+      }
+      if (formData.certification) {
+        formDataToSend.append('certification', formData.certification);
+      }
+      
+      const response = await ngoService.registerNGO(formDataToSend);
 
       if (response.ngo) {
         toast.success('NGO registration completed! Welcome aboard!');
@@ -119,6 +152,8 @@ const NGOForm = () => {
           socialPosts: false,
           termsAccepted: false
         });
+        setLogoPreview(null);
+        setCertificationPreview(null);
         
         // Show thank you message and navigate
         Swal.fire({
@@ -378,7 +413,7 @@ const NGOForm = () => {
                   <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
                     NGO Logo <span className="text-red-500">*</span>
                     <span className="text-sm text-gray-500 block">
-                      (PDF, JPG, JPEG, PNG - Max 2MB)
+                      (JPG, JPEG, PNG - Max 2MB)
                     </span>
                   </label>
                   <input
@@ -391,13 +426,22 @@ const NGOForm = () => {
                       hover:border-purple-400 transition-colors"
                     required
                   />
+                  {logoPreview && (
+                    <div className="mt-2">
+                      <img
+                        src={logoPreview}
+                        alt="Logo Preview"
+                        className="h-32 w-32 object-cover rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="group">
                   <label className="block text-sm font-medium text-purple-700 mb-1.5 group-hover:text-purple-900 transition-colors">
                     Certification Document <span className="text-red-500">*</span>
                     <span className="text-sm text-gray-500 block">
-                      (PDF, JPG, JPEG, PNG - Max 2MB)
+                      (JPG, JPEG, PNG - Max 2MB)
                     </span>
                   </label>
                   <input
@@ -410,6 +454,15 @@ const NGOForm = () => {
                       hover:border-purple-400 transition-colors"
                     required
                   />
+                  {certificationPreview && (
+                    <div className="mt-2">
+                      <img
+                        src={certificationPreview}
+                        alt="Certification Preview"
+                        className="h-32 w-32 object-cover rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

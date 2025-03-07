@@ -22,8 +22,9 @@ const RequestForm = () => {
     contactNumber: "",
     address: "",
     reason: "",
-    quantity: "",
     urgency: "normal",
+    message: '',
+    status: 'pending'
   });
 
   useEffect(() => {
@@ -63,6 +64,15 @@ const RequestForm = () => {
     fetchDonationDetails();
   }, [navigate, location.state, donationId, user]);
 
+  useEffect(() => {
+    if (donation) {
+      setFormData(prev => ({
+        ...prev,
+        availableQuantity: donation.quantity || 0
+      }));
+    }
+  }, [donation]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -79,81 +89,98 @@ const RequestForm = () => {
       return;
     }
 
+    if (!formData.reason) {
+      toast.error("Please provide a reason for your request");
+      return;
+    }
+
+    if (!donation) {
+      toast.error("Donation details not found");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
     try {
-      // First create the request in database
       const requestData = {
         donation: donationId,
         requestorName: formData.requestorName,
         contactNumber: formData.contactNumber,
         address: formData.address,
         reason: formData.reason,
-        quantity: formData.quantity,
         urgency: formData.urgency,
-        status: "pending",
+        status: "pending"
       };
-
+      
       const response = await requestService.createRequest(requestData);
 
-      // Then send email notification
-      const emailData = {
-        name: formData.requestorName,
-        email: formData.email || user.email,
-        message: `
-          <h2>New Donation Request</h2>
-          <h3>Donation Details:</h3>
-          <p>Title: ${donation?.title}</p>
-          <p>Type: ${donation?.type}</p>
-          <p>Description: ${donation?.description}</p>
-
-          <h3>Requester Details:</h3>
-          <p>Name: ${formData.requestorName}</p>
-          <p>Contact: ${formData.contactNumber}</p>
-          <p>Address: ${formData.address}</p>
-
-          <h3>Request Details:</h3>
-          <p>Reason: ${formData.reason}</p>
-          <p>Quantity Needed: ${formData.quantity}</p>
-          <p>Urgency Level: ${formData.urgency}</p>
-        `
-      };
-
-      const emailResponse = await fetch(`${import.meta.env.VITE_API_URL}/email/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData),
-      });
-
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        throw new Error(errorData.message || 'Failed to send email notification');
+      // Update donation status
+      try {
+        await donationService.updateDonation(donationId, {
+          status: 'requested'
+        });
+        
+        // Update local donation state
+        setDonation(prev => ({
+          ...prev,
+          status: 'requested'
+        }));
+      } catch (updateError) {
+        console.error('Failed to update donation status:', updateError);
       }
 
-      // Show success message and redirect
+      // Send email notification
+      try {
+        const emailData = {
+          name: formData.requestorName,
+          email: formData.email || user.email,
+          message: `
+            <h2>New Donation Request</h2>
+            <h3>Donation Details:</h3>
+            <p>Title: ${donation?.title}</p>
+            <p>Type: ${donation?.type}</p>
+            <p>Description: ${donation?.description}</p>
+
+            <h3>Requester Details:</h3>
+            <p>Name: ${formData.requestorName}</p>
+            <p>Contact: ${formData.contactNumber}</p>
+            <p>Address: ${formData.address}</p>
+            <p>Reason: ${formData.reason}</p>
+          `
+        };
+
+        await fetch(`${import.meta.env.VITE_API_URL}/email/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(emailData),
+        });
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+      }
+
       setShowSuccess(true);
       Swal.fire({
         title: 'Request Submitted Successfully!',
-        text: 'Your donation request has been received. We will notify the donor about your request.',
+        text: 'Your donation request has been received.',
         icon: 'success',
         confirmButtonText: 'OK',
         confirmButtonColor: '#6B46C1'
       }).then(() => {
-        navigate('/', {
-          state: {
+        navigate('/', { 
+          state: { 
             requestSuccess: true,
-            message: 'Your request has been submitted successfully!'
-          }
+            updatedDonationId: donationId,
+            updatedStatus: 'requested'
+          } 
         });
       });
 
     } catch (error) {
       console.error('Request submission error:', error);
-      toast.error(error.message || 'Failed to submit request');
-      setError(error.message || 'Failed to submit request');
+      toast.error(error.response?.data?.message || 'Failed to submit request');
     } finally {
       setIsSubmitting(false);
     }
@@ -245,20 +272,6 @@ const RequestForm = () => {
                 value={formData.reason}
                 onChange={handleChange}
                 rows="4"
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Quantity Needed
-              </label>
-              <input
-                type="text"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
               />

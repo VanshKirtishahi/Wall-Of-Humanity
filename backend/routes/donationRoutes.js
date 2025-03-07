@@ -6,11 +6,11 @@ const auth = require('../middleware/auth');
 const upload = require('../config/multer');
 const Donation = require('../models/Donation');
 const mongoose = require('mongoose');
-const multer = require('multer');
 const User = require('../models/User');
 const NGO = require('../models/NGO');
 const Volunteer = require('../models/Volunteer');
 const Request = require('../models/Request');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinaryUpload');
 
 // Get all donations
 router.get('/', async (req, res) => {
@@ -80,9 +80,18 @@ router.get('/my-donations', auth, async (req, res) => {
   }
 });
 
-// Create donation
+// Create donation with Cloudinary
 router.post('/', auth, upload.single('images'), async (req, res) => {
   try {
+    let imageUrl;
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.mimetype,
+        'donations'
+      );
+    }
+
     const donationData = {
       ...req.body,
       availability: JSON.parse(req.body.availability),
@@ -90,15 +99,11 @@ router.post('/', auth, upload.single('images'), async (req, res) => {
       user: req.userId,
       userId: req.userId,
       donorName: req.user.name,
-      images: req.file ? [`${req.file.filename}`] : []
+      images: imageUrl ? [imageUrl] : []
     };
 
     const donation = new Donation(donationData);
     await donation.save();
-    
-    console.log('File saved:', req.file);
-    console.log('Image path:', req.file ? req.file.filename : 'No image');
-    
     res.status(201).json(donation);
   } catch (error) {
     console.error('Error creating donation:', error);
@@ -114,14 +119,23 @@ router.get('/:id', auth, async (req, res) => {
     if (!donation) {
       return res.status(404).json({ message: 'Donation not found' });
     }
-    res.json(donation);
+    
+    // Send auth status along with donation data
+    res.json({
+      donation,
+      isAuthenticated: true,
+      user: req.user
+    });
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired', tokenExpired: true });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Update donation
-router.put('/:id', auth, upload.single('images'), async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
     if (!donation) {
@@ -129,45 +143,51 @@ router.put('/:id', auth, upload.single('images'), async (req, res) => {
     }
 
     // Check if user owns the donation
-    if (donation.user.toString() !== req.userId) {
-      return res.status(401).json({ message: 'Not authorized to update this donation' });
+    if (donation.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this donation' });
     }
 
-    const updateData = {
-      type: req.body.type,
-      title: req.body.title,
-      description: req.body.description,
-      quantity: req.body.quantity,
-      foodType: req.body.foodType,
-      location: JSON.parse(req.body.location),
-      availability: JSON.parse(req.body.availability),
-      user: req.userId
-    };
+    // Handle all updateable fields
+    const updateableFields = [
+      'title', 
+      'description', 
+      'type',
+      'quantity',
+      'foodType',
+      'images',
+      'availability',
+      'location',
+      'status'
+    ];
 
-    if (req.file) {
-      if (donation.images && donation.images.length > 0) {
-        const oldImagePath = path.join(__dirname, '../uploads/donations', donation.images[0]);
-        try {
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
+    // Update fields if they exist in request body
+    updateableFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        // Parse JSON strings for objects
+        if (typeof req.body[field] === 'string' && (field === 'availability' || field === 'location')) {
+          try {
+            donation[field] = JSON.parse(req.body[field]);
+          } catch (e) {
+            donation[field] = req.body[field];
           }
-        } catch (error) {
-          console.error('Error deleting old image:', error);
+        } else {
+          donation[field] = req.body[field];
         }
       }
-      updateData.images = [req.file.filename];
-    }
+    });
 
-    const updatedDonation = await Donation.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('user', 'name email');
-
-    res.json(updatedDonation);
+    const updatedDonation = await donation.save();
+    
+    res.json({
+      donation: updatedDonation,
+      message: 'Donation updated successfully'
+    });
   } catch (error) {
-    console.error('Update error:', error);
-    res.status(400).json({ message: error.message });
+    console.error('Update donation error:', error);
+    res.status(400).json({ 
+      message: error.message,
+      details: 'Failed to update donation'
+    });
   }
 });
 
@@ -181,6 +201,14 @@ router.delete('/:id', auth, async (req, res) => {
 
     if (donation.user.toString() !== req.user.id) {
       return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    // Delete image from Cloudinary if exists
+    if (donation.images && donation.images.length > 0) {
+      for (const imageUrl of donation.images) {
+        const publicId = imageUrl.split('/').slice(-1)[0].split('.')[0];
+        await deleteFromCloudinary(publicId);
+      }
     }
 
     await donation.deleteOne();
@@ -238,19 +266,54 @@ router.get('/debug-stats', async (req, res) => {
   }
 });
 
-router.post('/create', auth, async (req, res) => {
+router.post('/create', auth, upload.array('images', 5), async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const imageUrls = [];
+    if (req.files) {
+      for (const file of req.files) {
+        const cloudinaryUrl = await uploadToCloudinary(file, 'donations');
+        imageUrls.push(cloudinaryUrl);
+      }
+    }
+
     const donation = new Donation({
       ...req.body,
-      userId: req.userId,
-      donorName: user.name // Add donor's name from user
+      images: imageUrls,
+      userId: req.userId
     });
-    
+
     await donation.save();
     res.status(201).json(donation);
   } catch (error) {
     console.error('Error creating donation:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update donation status when request is created
+router.patch('/:id/status', auth, async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) {
+      return res.status(404).json({ message: 'Donation not found' });
+    }
+
+    const validStatuses = ['available', 'pending', 'completed', 'requested'];
+    if (!validStatuses.includes(req.body.status)) {
+      return res.status(400).json({ 
+        message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` 
+      });
+    }
+
+    donation.status = req.body.status;
+    const updatedDonation = await donation.save();
+    
+    res.json({
+      donation: updatedDonation,
+      message: 'Donation status updated successfully'
+    });
+  } catch (error) {
+    console.error('Update donation status error:', error);
     res.status(400).json({ message: error.message });
   }
 });

@@ -65,39 +65,15 @@ class DonationService {
     }
   }
 
-  async updateDonation(id, formData) {
+  async updateDonation(id, updateData) {
     try {
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        throw new Error('Authentication required');
-      }
-
-      const user = JSON.parse(userData);
-      if (!user.token) {
-        localStorage.removeItem('user');
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/donations/${id}`, {
-        method: 'PUT',
+      const response = await api.patch(`/donations/${id}`, updateData, {
         headers: {
-          'Authorization': `Bearer ${user.token}`,
-          'Accept': 'application/json'
-        },
-        body: formData,
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('user');
-          throw new Error('Authentication required');
+          'Content-Type': updateData instanceof FormData ? 'multipart/form-data' : 'application/json',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
         }
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update donation');
-      }
-
-      return await response.json();
+      });
+      return response.data;
     } catch (error) {
       console.error('Update donation error:', error);
       throw error;
@@ -143,25 +119,14 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      formData.append('userId', user._id);
-      formData.append('user', user._id);
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/donations`, {
-        method: 'POST',
+      const response = await api.post('/donations', formData, {
         headers: {
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: formData,
-        credentials: 'include'
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create donation');
-      }
-
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       console.error('Create donation error:', error);
       throw error;

@@ -10,6 +10,8 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const emailService = require('../services/email.service');
+const upload = require('../config/multer');
+const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
@@ -22,7 +24,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const uploadMulter = multer({ 
   storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
@@ -169,7 +171,15 @@ router.get('/profile', auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+
+    // Ensure avatarUrl is included in response
+    const userResponse = {
+      ...user.toObject(),
+      avatarUrl: user.avatarUrl || null
+    };
+
+    console.log('Fetching profile with avatar:', userResponse.avatarUrl);
+    res.json(userResponse);
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -227,33 +237,46 @@ router.get('/verify', auth, async (req, res) => {
 });
 
 // Update profile route
-router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
+router.put('/profile', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update fields if provided
-    if (req.body.name) user.name = req.body.name;
-    if (req.body.email) user.email = req.body.email;
-    if (req.body.bio) user.bio = req.body.bio;
-    if (req.body.phone) user.phone = req.body.phone;
-    if (req.body.address) user.address = req.body.address;
-    
-    // Handle avatar upload
-    if (req.file) {
-      user.avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    }
+    console.log('Updating profile with data:', req.body);
 
+    // Update basic fields if provided
+    const updateFields = ['name', 'email', 'bio', 'phone', 'address', 'avatarUrl'];
+    updateFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    // Save the updated user
     const updatedUser = await user.save();
-    const userResponse = updatedUser.toObject();
+    
+    // Remove sensitive data and ensure avatarUrl is included
+    const userResponse = {
+      ...updatedUser.toObject(),
+      avatarUrl: updatedUser.avatarUrl || null
+    };
     delete userResponse.password;
     
+    console.log('Updated user:', {
+      id: userResponse._id,
+      name: userResponse.name,
+      avatarUrl: userResponse.avatarUrl
+    });
+
     res.json(userResponse);
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ message: 'Failed to update profile' });
+    res.status(500).json({ 
+      message: 'Failed to update profile',
+      error: error.message 
+    });
   }
 });
 
@@ -277,6 +300,93 @@ router.delete('/profile/delete', auth, async (req, res) => {
   } catch (error) {
     console.error('Delete account error:', error);
     res.status(500).json({ message: 'Error deleting account' });
+  }
+});
+
+// Upload avatar to Cloudinary
+router.post('/upload-avatar', auth, upload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    console.log('Uploading file to Cloudinary...');
+    // Upload to Cloudinary
+    const avatarUrl = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.mimetype,
+      'avatars'
+    );
+
+    if (!avatarUrl) {
+      throw new Error('Failed to upload to Cloudinary');
+    }
+
+    // Update user's avatarUrl
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.avatarUrl = avatarUrl;
+      await user.save();
+    }
+
+    console.log('Successfully uploaded to Cloudinary:', avatarUrl);
+    res.json({ avatarUrl });
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ 
+      message: 'Failed to upload avatar',
+      error: error.message 
+    });
+  }
+});
+
+// Change password route
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: 'Please provide both current and new password'
+      });
+    }
+
+    // Validate new password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: 'New password must be at least 6 characters long'
+      });
+    }
+
+    // Get user with password
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    user.updatedAt = new Date();
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      message: 'Failed to change password',
+      error: error.message
+    });
   }
 });
 

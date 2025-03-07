@@ -5,6 +5,8 @@ const auth = require('../middleware/auth');
 const FreeFoodListing = require('../models/FreeFoodListing');
 const fs = require('fs').promises;
 const { deleteUploadedImage } = require('../utils/fileUtils');
+const upload = require('../config/multer');
+const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 
 const router = express.Router();
 
@@ -16,23 +18,6 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, 'venue-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Only image files are allowed!'));
   }
 });
 
@@ -48,34 +33,31 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-// Create new listing with image upload
-router.post('/', auth, upload.single('venueImage'), handleMulterError, async (req, res) => {
+// Create new listing
+router.post('/', auth, upload.single('venueImage'), async (req, res) => {
   try {
+    let imageUrl;
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.mimetype,
+        'free-food'
+      );
+    }
+
     const listingData = {
       ...req.body,
-      uploadedBy: req.user._id
+      uploadedBy: req.user._id,
+      venueImage: imageUrl || '',
+      availability: JSON.parse(req.body.availability),
+      location: JSON.parse(req.body.location)
     };
-
-    // Parse JSON strings back to objects
-    if (req.body.availability) {
-      listingData.availability = JSON.parse(req.body.availability);
-    }
-    if (req.body.location) {
-      listingData.location = JSON.parse(req.body.location);
-    }
-
-    // Add image path if image was uploaded
-    if (req.file) {
-      listingData.venueImage = req.file.filename;
-      console.log('Saved image filename:', req.file.filename);
-      console.log('Full image path:', path.join('uploads/free-food', req.file.filename));
-    }
 
     const listing = new FreeFoodListing(listingData);
     await listing.save();
     res.status(201).json(listing);
   } catch (error) {
-    console.error('Error creating free food listing:', error);
+    console.error('Error creating listing:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -107,7 +89,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update listing
-router.put('/:id', auth, upload.single('venueImage'), handleMulterError, async (req, res) => {
+router.put('/:id', auth, upload.single('venueImage'), async (req, res) => {
   try {
     const listing = await FreeFoodListing.findById(req.params.id);
     if (!listing) {
@@ -115,38 +97,34 @@ router.put('/:id', auth, upload.single('venueImage'), handleMulterError, async (
     }
 
     if (listing.uploadedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Not authorized to update this listing' });
+      return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const listingData = { ...req.body };
-    
-    // Parse JSON fields
-    if (req.body.availability) {
-      listingData.availability = JSON.parse(req.body.availability);
-    }
-    if (req.body.location) {
-      listingData.location = JSON.parse(req.body.location);
-    }
-    
-    // Handle image update
+    const updateData = {
+      ...req.body,
+      availability: JSON.parse(req.body.availability),
+      location: JSON.parse(req.body.location)
+    };
+
     if (req.file) {
-      // Delete old image if exists
-      if (listing.venueImage) {
-        await deleteUploadedImage(listing.venueImage, 'free-food');
-      }
-      listingData.venueImage = req.file.filename;
+      const imageUrl = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.mimetype,
+        'free-food'
+      );
+      updateData.venueImage = imageUrl;
     }
 
     const updatedListing = await FreeFoodListing.findByIdAndUpdate(
       req.params.id,
-      listingData,
-      { new: true, runValidators: true }
+      updateData,
+      { new: true }
     );
 
     res.json(updatedListing);
   } catch (error) {
     console.error('Update error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 

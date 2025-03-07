@@ -5,34 +5,8 @@ const multer = require('multer');
 const path = require('path');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.fieldname === 'logo') {
-      cb(null, 'uploads/ngo-logos');
-    } else if (file.fieldname === 'certification') {
-      cb(null, 'uploads/ngo-certificates');
-    }
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      cb(new Error('Invalid file type. Only JPEG, PNG and PDF files are allowed.'));
-    }
-    cb(null, true);
-  }
-});
+const upload = require('../config/multer');
+const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 
 // Get all NGOs
 router.get('/', async (req, res) => {
@@ -59,13 +33,43 @@ router.post('/register', upload.fields([
   { name: 'certification', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    console.log('Received form data:', req.body); // Add logging
+    console.log('Received form data:', req.body);
 
     // Validate required fields
     const requiredFields = ['organizationName', 'organizationEmail', 'phoneNumber', 'ngoType', 'address'];
     for (const field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({ message: `${field} is required` });
+      }
+    }
+
+    let logoUrl, certificationUrl;
+
+    // Upload logo to Cloudinary
+    if (req.files?.logo?.[0]) {
+      try {
+        logoUrl = await uploadToCloudinary(
+          req.files.logo[0].buffer,
+          req.files.logo[0].mimetype,
+          'ngo-logos'
+        );
+      } catch (error) {
+        console.error('Error uploading logo:', error);
+        return res.status(400).json({ message: 'Failed to upload logo' });
+      }
+    }
+
+    // Upload certification to Cloudinary
+    if (req.files?.certification?.[0]) {
+      try {
+        certificationUrl = await uploadToCloudinary(
+          req.files.certification[0].buffer,
+          req.files.certification[0].mimetype,
+          'ngo-certificates'
+        );
+      } catch (error) {
+        console.error('Error uploading certification:', error);
+        return res.status(400).json({ message: 'Failed to upload certification' });
       }
     }
 
@@ -81,8 +85,8 @@ router.post('/register', upload.fields([
       address: req.body.address,
       ngoWebsite: req.body.ngoWebsite,
       socialMediaLinks: req.body.socialMediaLinks,
-      logo: req.files?.logo?.[0]?.filename,
-      certification: req.files?.certification?.[0]?.filename,
+      logo: logoUrl,
+      certification: certificationUrl,
       status: 'pending'
     });
 

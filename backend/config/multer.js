@@ -14,16 +14,8 @@ if (!fs.existsSync(donationsDir)) {
   fs.mkdirSync(donationsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, donationsDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '-');
-    cb(null, filename);
-  }
-});
+// Configure multer for temporary storage (for Cloudinary)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,

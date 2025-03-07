@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import donationService from '../../services/donation.service';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { DEFAULT_DONATION_IMAGE, DEFAULT_VENUE_IMAGE } from '../../constants/images';
+import { DEFAULT_DONATION_IMAGE } from '../../constants/images';
+import api from '../../services/api';
 
 const DonationForm = () => {
   const { user } = useAuth();
@@ -21,10 +22,20 @@ const DonationForm = () => {
     quantity: '',
     foodType: '',
     images: [],
+    createdAt: new Date().toLocaleDateString(),
     availability: {
-      startTime: '',
-      endTime: '',
-      notes: ''
+      type: 'specific',
+      startTime: {
+        hours: '12',
+        minutes: '00',
+        period: 'AM'
+      },
+      endTime: {
+        hours: '12',
+        minutes: '00',
+        period: 'PM'
+      },
+      specificDate: new Date().toISOString().split('T')[0]
     },
     location: {
       address: '',
@@ -55,7 +66,15 @@ const DonationForm = () => {
 
       if (id) {
         try {
-          const donation = await donationService.getDonationById(id);
+          const response = await donationService.getDonationById(id);
+          const donation = response.donation;
+
+          if (!donation) {
+            toast.error('Donation not found');
+            navigate('/my-donations');
+            return;
+          }
+
           setFormData({
             type: donation.type || 'Food',
             title: donation.title || '',
@@ -63,9 +82,12 @@ const DonationForm = () => {
             quantity: donation.quantity || '',
             foodType: donation.foodType || '',
             images: donation.images || [],
+            createdAt: donation.createdAt || new Date().toLocaleDateString(),
             availability: {
-              startTime: donation.availability?.startTime || '',
-              endTime: donation.availability?.endTime || '',
+              type: donation.availability?.type || 'specific',
+              startTime: parseTimeFromDatabase(donation.availability?.startTime),
+              endTime: parseTimeFromDatabase(donation.availability?.endTime),
+              specificDate: donation.availability?.specificDate || new Date().toISOString().split('T')[0],
               notes: donation.availability?.notes || ''
             },
             location: {
@@ -77,8 +99,11 @@ const DonationForm = () => {
             }
           });
           
-          updateImagePreview(donation.images);
+          if (donation.images && donation.images.length > 0) {
+            setImagePreview(donation.images[0]);
+          }
         } catch (error) {
+          console.error('Error fetching donation:', error);
           if (error.message === 'Authentication required') {
             navigate('/login', { 
               state: { from: `/donation-form/${id}` },
@@ -117,7 +142,7 @@ const DonationForm = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         toast.error('Image size should be less than 5MB');
         return;
       }
@@ -132,14 +157,62 @@ const DonationForm = () => {
 
   const updateImagePreview = (images) => {
     if (images && images.length > 0) {
-      const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '');
-      setImagePreview(Array.isArray(images) 
-        ? `${baseUrl}/uploads/donations/${images[0]}`
-        : `${baseUrl}/uploads/donations/${images}`
-      );
+      setImagePreview(images[0]);
     } else {
       setImagePreview(DEFAULT_DONATION_IMAGE);
     }
+  };
+
+  const handleImageUpload = async (files) => {
+    const formData = new FormData();
+    Array.from(files).forEach(file => {
+      formData.append('images', file);
+    });
+    
+    try {
+      const response = await api.post('/donations/upload-images', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data.imageUrls;
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+      return [];
+    }
+  };
+
+  const handleTimeChange = (timeType, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [timeType]: {
+          ...prev.availability[timeType],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const formatTimeForSubmission = (timeObj) => {
+    if (!timeObj || !timeObj.hours || !timeObj.minutes || !timeObj.period) {
+      return '12:00'; // Default time if invalid
+    }
+
+    const hours = parseInt(timeObj.hours);
+    let adjustedHours;
+    
+    if (timeObj.period === 'AM') {
+      // Handle 12 AM (midnight)
+      adjustedHours = hours === 12 ? 0 : hours;
+    } else { // PM
+      // Handle 12 PM (noon)
+      adjustedHours = hours === 12 ? 12 : hours + 12;
+    }
+    
+    return `${adjustedHours.toString().padStart(2, '0')}:${timeObj.minutes}`;
   };
 
   const handleSubmit = async (e) => {
@@ -148,17 +221,27 @@ const DonationForm = () => {
 
     try {
       const formDataToSend = new FormData();
+      const submissionData = {
+        ...formData,
+        user: user._id,
+        userId: user._id,
+        availability: {
+          ...formData.availability,
+          startTime: formatTimeForSubmission(formData.availability.startTime),
+          endTime: formatTimeForSubmission(formData.availability.endTime)
+        }
+      };
       
-      // Add all form data except images
-      Object.keys(formData).forEach(key => {
+      delete submissionData.user;
+      
+      Object.keys(submissionData).forEach(key => {
         if (key === 'availability' || key === 'location') {
-          formDataToSend.append(key, JSON.stringify(formData[key]));
+          formDataToSend.append(key, JSON.stringify(submissionData[key]));
         } else if (key !== 'images') {
-          formDataToSend.append(key, formData[key]);
+          formDataToSend.append(key, submissionData[key]);
         }
       });
       
-      // Add image if exists
       if (image) {
         formDataToSend.append('images', image);
       }
@@ -167,7 +250,7 @@ const DonationForm = () => {
       if (id) {
         response = await donationService.updateDonation(id, formDataToSend);
       } else {
-        response = await donationService.createDonationWithImage(formDataToSend);
+        response = await donationService.createDonation(formDataToSend);
       }
 
       toast.success(`Donation ${id ? 'updated' : 'created'} successfully!`);
@@ -175,6 +258,51 @@ const DonationForm = () => {
     } catch (error) {
       console.error('Submission error:', error);
       toast.error(error.message || 'Failed to submit donation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const parseTimeFromDatabase = (timeString) => {
+    if (!timeString) return { hours: '12', minutes: '00', period: 'AM' };
+    
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      
+      // Convert 24-hour format to 12-hour format
+      let period = hour >= 12 ? 'PM' : 'AM';
+      let displayHour = hour % 12;
+      if (displayHour === 0) displayHour = 12;
+      
+      return {
+        hours: displayHour.toString().padStart(2, '0'),
+        minutes: minutes,
+        period: period
+      };
+    } catch (error) {
+      return { hours: '12', minutes: '00', period: 'AM' };
+    }
+  };
+
+  const fetchDonation = async () => {
+    try {
+      setIsLoading(true);
+      const response = await donationService.getDonationById(id);
+      const donation = response.data;
+
+      setFormData({
+        ...formData,
+        ...donation,
+        availability: {
+          ...formData.availability,
+          startTime: parseTimeFromDatabase(donation.availability?.startTime),
+          endTime: parseTimeFromDatabase(donation.availability?.endTime)
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching donation:', error);
+      toast.error('Failed to fetch donation details');
     } finally {
       setIsLoading(false);
     }
@@ -270,56 +398,107 @@ const DonationForm = () => {
             {formData.type === 'Food' && (
               <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
                 <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
-                  <span className="bg-purple-100 p-2 rounded-lg mr-2">🍽️</span>
-                  Food Details
+                  <span className="bg-purple-100 p-2 rounded-lg mr-2">🕒</span>
+                  Availability
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium">Pickup Time Availability</h3>
-                    <div className="tooltip" title="Specify when the food donation can be picked up">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-gray-500 italic mb-4">
-                    Please specify the time window when the food donation will be available for pickup
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-gray-700 mb-2">Start Time</label>
-                      <input
-                        type="time"
-                        name="availability.startTime"
-                        value={formData.availability.startTime}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-2">End Time</label>
-                      <input
-                        type="time"
-                        name="availability.endTime"
-                        value={formData.availability.endTime}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                  </div>
-
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-gray-700 mb-2">Additional Pickup Instructions</label>
-                    <textarea
-                      name="availability.notes"
-                      value={formData.availability.notes}
+                    <label className="block text-sm font-medium text-purple-700">Availability Type</label>
+                    <select
+                      name="availability.type"
+                      value={formData.availability.type}
                       onChange={handleChange}
-                      placeholder="E.g., Please call 10 minutes before pickup, Ring doorbell upon arrival, etc."
-                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      rows="2"
-                    />
+                      className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
+                    >
+                      <option value="specific">Specific Date</option>
+                      <option value="weekdays">Weekdays (Mon-Fri)</option>
+                      <option value="weekend">Weekend (Sat-Sun)</option>
+                      <option value="allDays">All Days</option>
+                    </select>
+                  </div>
+
+                  {formData.availability.type === 'specific' && (
+                    <div>
+                      <label className="block text-sm font-medium text-purple-700 mb-2">Select Date</label>
+                      <input
+                        type="date"
+                        name="availability.specificDate"
+                        value={formData.availability.specificDate}
+                        onChange={handleChange}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
+                        required={formData.availability.type === 'specific'}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-purple-700">Start Time</label>
+                      <div className="flex gap-2 mt-1">
+                        <select
+                          value={formData.availability.startTime.hours}
+                          onChange={(e) => handleTimeChange('startTime', 'hours', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          {[...Array(12)].map((_, i) => (
+                            <option key={i} value={(i + 1).toString().padStart(2, '0')}>
+                              {(i + 1).toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={formData.availability.startTime.minutes}
+                          onChange={(e) => handleTimeChange('startTime', 'minutes', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          {['00', '15', '30', '45'].map(min => (
+                            <option key={min} value={min}>{min}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={formData.availability.startTime.period}
+                          onChange={(e) => handleTimeChange('startTime', 'period', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-purple-700">End Time</label>
+                      <div className="flex gap-2 mt-1">
+                        <select
+                          value={formData.availability.endTime.hours}
+                          onChange={(e) => handleTimeChange('endTime', 'hours', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          {[...Array(12)].map((_, i) => (
+                            <option key={i} value={(i + 1).toString().padStart(2, '0')}>
+                              {(i + 1).toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={formData.availability.endTime.minutes}
+                          onChange={(e) => handleTimeChange('endTime', 'minutes', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          {['00', '15', '30', '45'].map(min => (
+                            <option key={min} value={min}>{min}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={formData.availability.endTime.period}
+                          onChange={(e) => handleTimeChange('endTime', 'period', e.target.value)}
+                          className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

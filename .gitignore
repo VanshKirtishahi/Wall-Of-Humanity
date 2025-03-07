@@ -1,5 +1,5 @@
 # Dependencies
-node_modules/
+/node_modules
 /.pnp
 .pnp.js
 
@@ -52,4 +52,16 @@ backend/uploads/*
 
 # Vite
 .vite/
-*.local 
+*.local
+
+# Misc
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Vercel
+.vercel 

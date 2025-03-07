@@ -10,44 +10,8 @@ const getAllNGOs = async () => {
   }
 };
 
-const registerNGO = async (ngoData) => {
+const registerNGO = async (formData) => {
   try {
-    const formData = new FormData();
-    
-    // Map form fields directly without renaming
-    const fieldsToMap = {
-      organizationName: ngoData.organizationName,
-      organizationEmail: ngoData.organizationEmail,
-      phoneNumber: ngoData.phoneNumber,
-      contactPersonName: ngoData.contactPersonName,
-      contactPersonEmail: ngoData.contactPersonEmail,
-      contactPersonPhone: ngoData.contactPersonPhone,
-      ngoType: ngoData.ngoType,
-      address: ngoData.address,
-      ngoWebsite: ngoData.ngoWebsite || '',
-      socialMediaLinks: ngoData.socialMediaLinks || ''
-    };
-
-    // Append all fields
-    Object.entries(fieldsToMap).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value);
-      }
-    });
-
-    // Handle date separately
-    if (ngoData.incorporationDate) {
-      formData.append('incorporationDate', ngoData.incorporationDate.toISOString());
-    }
-
-    // Handle files
-    if (ngoData.logo instanceof File) {
-      formData.append('logo', ngoData.logo);
-    }
-    if (ngoData.certification instanceof File) {
-      formData.append('certification', ngoData.certification);
-    }
-
     const response = await api.post('/ngos/register', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

@@ -22,6 +22,16 @@ const DonationCart = () => {
       try {
         setIsLoading(true);
         const donationsData = await donationService.getAllDonations();
+        
+        // Update donation status if coming from request form
+        if (location.state?.updatedDonationId && location.state?.updatedStatus) {
+          donationsData = donationsData.map(donation => 
+            donation._id === location.state.updatedDonationId 
+              ? { ...donation, status: location.state.updatedStatus }
+              : donation
+          );
+        }
+        
         setDonations(donationsData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -33,7 +43,7 @@ const DonationCart = () => {
     };
 
     fetchData();
-  }, []);
+  }, [location.state]);
 
   const handleEdit = async (donationId) => {
     navigate(`/donation-form/${donationId}`);

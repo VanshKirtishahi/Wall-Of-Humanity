@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import emailService from '../../services/email.service';
+import api from '../../config/axios';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -21,20 +21,24 @@ const ContactForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    toast.info('Sending your message...');
 
     try {
-      await emailService.sendContactEmail(formData);
-      toast.success('Message sent successfully! We will get back to you soon.');
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
+      const response = await api.post('/api/contact', formData);
+      
+      if (response.data.success) {
+        toast.success(response.data.message || 'Message sent successfully!');
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to send message');
+      }
     } catch (error) {
       console.error('Contact form error:', error);
-      toast.error(error.message || 'Failed to send message. Please try again later.');
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

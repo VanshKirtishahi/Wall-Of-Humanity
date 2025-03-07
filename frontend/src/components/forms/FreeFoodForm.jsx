@@ -10,6 +10,7 @@ const FreeFoodForm = () => {
   const { user } = useAuth();
   const [imagePreview, setImagePreview] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [image, setImage] = useState(null);
   
   const foodTypes = [
     'Lunch', 'Dinner', 'Full Meals', 'Prasad', 'Langar', 'Other'
@@ -18,10 +19,19 @@ const FreeFoodForm = () => {
   const [formData, setFormData] = useState({
     venue: '',
     foodType: '',
+    createdAt: new Date().toLocaleDateString(),
     availability: {
       type: 'specific',
-      startTime: '',
-      endTime: '',
+      startTime: {
+        hours: '12',
+        minutes: '00',
+        period: 'AM'
+      },
+      endTime: {
+        hours: '12',
+        minutes: '00',
+        period: 'PM'
+      },
       specificDate: new Date().toISOString().split('T')[0]
     },
     organizedBy: '',
@@ -76,10 +86,19 @@ const FreeFoodForm = () => {
       setFormData({
         venue: listing.venue || '',
         foodType: listing.foodType || '',
+        createdAt: listing.createdAt || new Date().toLocaleDateString(),
         availability: {
           type: listing.availability?.type || 'specific',
-          startTime: listing.availability?.startTime || '',
-          endTime: listing.availability?.endTime || '',
+          startTime: {
+            hours: listing.availability?.startTime?.hours || '12',
+            minutes: listing.availability?.startTime?.minutes || '00',
+            period: listing.availability?.startTime?.period || 'AM'
+          },
+          endTime: {
+            hours: listing.availability?.endTime?.hours || '12',
+            minutes: listing.availability?.endTime?.minutes || '00',
+            period: listing.availability?.endTime?.period || 'PM'
+          },
           specificDate: formattedDate
         },
         organizedBy: listing.organizedBy || '',
@@ -144,7 +163,11 @@ const FreeFoodForm = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, venueImage: file }));
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -153,52 +176,78 @@ const FreeFoodForm = () => {
     }
   };
 
+  const updateImagePreview = (imageUrl) => {
+    if (imageUrl) {
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(DEFAULT_VENUE_IMAGE);
+    }
+  };
+
+  const handleTimeChange = (timeType, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [timeType]: {
+          ...prev.availability[timeType],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const formatTimeForSubmission = (timeObj) => {
+    const hours = parseInt(timeObj.hours);
+    const adjustedHours = timeObj.period === 'PM' && hours !== 12 
+      ? hours + 12 
+      : (timeObj.period === 'AM' && hours === 12 ? 0 : hours);
+    return `${adjustedHours.toString().padStart(2, '0')}:${timeObj.minutes}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    const formDataToSend = new FormData();
-    
-    Object.keys(formData).forEach(key => {
-      if (key === 'venueImage') {
-        if (formData[key]) {
-          formDataToSend.append('venueImage', formData[key]);
-        }
-      } else if (key === 'availability' || key === 'location') {
-        formDataToSend.append(key, JSON.stringify(formData[key]));
-      } else {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
 
     try {
+      const formDataToSend = new FormData();
+      const submissionData = {
+        ...formData,
+        availability: {
+          ...formData.availability,
+          startTime: formatTimeForSubmission(formData.availability.startTime),
+          endTime: formatTimeForSubmission(formData.availability.endTime)
+        }
+      };
+      
+      Object.keys(submissionData).forEach(key => {
+        if (key === 'availability' || key === 'location') {
+          formDataToSend.append(key, JSON.stringify(submissionData[key]));
+        } else if (key !== 'venueImage') {
+          formDataToSend.append(key, submissionData[key]);
+        }
+      });
+      
+      if (image) {
+        formDataToSend.append('venueImage', image);
+      }
+
       let response;
       if (id) {
         response = await api.put(`/api/free-food/${id}`, formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        toast.success('Free food listing updated successfully!');
       } else {
         response = await api.post('/api/free-food', formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        toast.success('Free food listing created successfully!');
       }
 
-      // Update image preview if new image was uploaded
-      if (response.data.venueImage) {
-        setImagePreview(`${api.defaults.baseURL}/uploads/free-food/${response.data.venueImage}`);
-      }
-
-      navigate('/free-food', { 
-        state: { 
-          listingSuccess: true, 
-          message: id ? 'Listing updated successfully!' : 'Listing created successfully!' 
-        }
-      });
+      toast.success(`Listing ${id ? 'updated' : 'created'} successfully!`);
+      navigate('/free-food');
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error(id ? 'Failed to update listing' : 'Failed to create listing');
+      console.error('Submission error:', error);
+      toast.error(error.message || 'Failed to submit listing');
     } finally {
       setIsLoading(false);
     }
@@ -374,25 +423,69 @@ const FreeFoodForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-purple-700">Start Time</label>
-                  <input
-                    type="time"
-                    name="availability.startTime"
-                    value={formData.availability.startTime}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
-                    required
-                  />
+                  <div className="flex gap-2 mt-1">
+                    <select
+                      value={formData.availability.startTime.hours}
+                      onChange={(e) => handleTimeChange('startTime', 'hours', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      {[...Array(12)].map((_, i) => (
+                        <option key={i} value={(i + 1).toString().padStart(2, '0')}>
+                          {(i + 1).toString().padStart(2, '0')}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.startTime.minutes}
+                      onChange={(e) => handleTimeChange('startTime', 'minutes', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      {['00', '15', '30', '45'].map(min => (
+                        <option key={min} value={min}>{min}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.startTime.period}
+                      onChange={(e) => handleTimeChange('startTime', 'period', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-purple-700">End Time</label>
-                  <input
-                    type="time"
-                    name="availability.endTime"
-                    value={formData.availability.endTime}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
-                    required
-                  />
+                  <div className="flex gap-2 mt-1">
+                    <select
+                      value={formData.availability.endTime.hours}
+                      onChange={(e) => handleTimeChange('endTime', 'hours', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      {[...Array(12)].map((_, i) => (
+                        <option key={i} value={(i + 1).toString().padStart(2, '0')}>
+                          {(i + 1).toString().padStart(2, '0')}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.endTime.minutes}
+                      onChange={(e) => handleTimeChange('endTime', 'minutes', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      {['00', '15', '30', '45'].map(min => (
+                        <option key={min} value={min}>{min}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.endTime.period}
+                      onChange={(e) => handleTimeChange('endTime', 'period', e.target.value)}
+                      className="rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -434,6 +527,11 @@ const FreeFoodForm = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Created Date Display */}
+          <div className="text-right text-sm text-gray-600 mb-4">
+            Created: {formData.createdAt}
           </div>
 
           {/* Submit Button */}

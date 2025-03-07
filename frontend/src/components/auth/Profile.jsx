@@ -45,7 +45,7 @@ const Profile = () => {
           address: data.address || ''
         });
         if (data.avatarUrl) {
-          setAvatarPreview(`${import.meta.env.VITE_API_URL}${data.avatarUrl}`);
+          setAvatarPreview(data.avatarUrl);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -97,38 +97,62 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = new FormData();
-      Object.keys(editedData).forEach(key => {
-        if (editedData[key] !== undefined && editedData[key] !== null) {
-          formData.append(key, editedData[key]);
-        }
-      });
-      
-      if (avatar) {
-        formData.append('avatar', avatar);
-      }
+  const handleAvatarUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
 
-      const response = await api.put('/auth/profile', formData, {
+    try {
+      const response = await api.post('/auth/upload-avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      if (response.data.avatarUrl) {
+        return response.data.avatarUrl;
+      }
+      throw new Error('Failed to get avatar URL');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload avatar to Cloudinary');
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let cloudinaryUrl;
+      if (avatar) {
+        cloudinaryUrl = await handleAvatarUpload(avatar);
+        if (!cloudinaryUrl) {
+          toast.error('Failed to upload avatar');
+          return;
+        }
+      }
+
+      const updateData = {
+        ...editedData,
+        avatarUrl: cloudinaryUrl || profileData.avatarUrl
+      };
+
+      const response = await api.put('/auth/profile', updateData);
+      
       // Update local state and context
       setProfileData(response.data);
-      if (response.data.avatarUrl) {
-        setAvatarPreview(`${import.meta.env.VITE_API_URL}${response.data.avatarUrl}`);
-      }
+      setAvatarPreview(cloudinaryUrl || response.data.avatarUrl);
       
-      // Update user context
+      // Update user context with avatar URL
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const updatedUser = { ...currentUser, ...response.data };
+      const updatedUser = { 
+        ...currentUser, 
+        ...response.data,
+        avatarUrl: cloudinaryUrl || response.data.avatarUrl 
+      };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       
       setIsEditing(false);
+      setAvatar(null); // Reset avatar state
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Update error:', error);
@@ -173,9 +197,9 @@ const Profile = () => {
 
   const getAvatarUrl = (avatarPath) => {
     if (!avatarPath) return defaultAvatar;
-    return avatarPath.startsWith('data:') 
-      ? avatarPath 
-      : `${import.meta.env.VITE_API_URL}${avatarPath}`;
+    if (avatarPath.startsWith('data:')) return avatarPath; // For preview
+    if (avatarPath.startsWith('http')) return avatarPath; // For Cloudinary URLs
+    return defaultAvatar; // Fallback to default avatar
   };
 
   if (loading) {
@@ -218,7 +242,7 @@ const Profile = () => {
                 <div className="relative">
                   <img
                     src={getAvatarUrl(avatarPreview || profileData?.avatarUrl)}
-                    alt="Profile"
+                    alt={profileData?.name || 'Profile'}
                     className="h-32 w-32 rounded-full border-4 border-white object-cover bg-white shadow-lg"
                     onError={(e) => {
                       e.target.onerror = null;

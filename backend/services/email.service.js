@@ -15,53 +15,72 @@ class EmailService {
         rejectUnauthorized: false
       }
     });
+
+    // Verify transporter
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('SMTP connection error:', error);
+      } else {
+        console.log('SMTP server is ready to take messages');
+      }
+    });
   }
 
-  async sendWelcomeEmail(userEmail, userName) {
+  async sendContactEmail(name, email, message) {
     try {
-      console.log('Sending welcome email to:', userEmail, userName);
-
+      console.log('Preparing to send contact email from:', email);
+      
       const mailOptions = {
-        from: `"Wall of Humanity" <${process.env.EMAIL_USER}>`,
-        to: userEmail,
-        subject: 'Welcome to Wall of Humanity',
+        from: `"${name}" <${process.env.EMAIL_USER}>`,
+        replyTo: email,
+        to: process.env.EMAIL_USER,
+        subject: `New Contact Form Message from ${name}`,
         html: `
-          <h2>Welcome to Wall of Humanity, ${userName}!</h2>
-          <p>Thank you for joining our community. We're excited to have you on board!</p>
-          <p>Together, we can make a difference.</p>
+          <h3>New Contact Form Submission</h3>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
         `
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Welcome email sent successfully:', info.messageId);
-      return info;
+      console.log('Contact email sent:', info.messageId);
+      return true;
     } catch (error) {
-      console.error('Error sending welcome email:', error);
-      throw error;
+      console.error('Email send error:', error);
+      throw new Error('Failed to send email: ' + error.message);
     }
   }
 
-  async sendContactEmail(formData) {
+  async sendWelcomeEmail(email, name) {
     try {
+      console.log('Sending welcome email to:', email);
+      
       const mailOptions = {
-        from: `"${formData.name}" <${formData.email}>`,
-        to: process.env.EMAIL_USER,
-        subject: formData.subject || 'Contact Form Submission',
+        from: `"Wall of Humanity" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Welcome to Wall of Humanity',
         html: `
-          <h3>New Contact Form Submission</h3>
-          <p><strong>From:</strong> ${formData.name}</p>
-          <p><strong>Email:</strong> ${formData.email}</p>
-          <p><strong>Message:</strong> ${formData.message}</p>
+          <h2>Welcome to Wall of Humanity, ${name}!</h2>
+          <p>Thank you for joining our community. We're excited to have you with us.</p>
+          <p>Together, we can make a difference in people's lives.</p>
+          <br>
+          <p>Best regards,</p>
+          <p>The Wall of Humanity Team</p>
         `
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      return info;
+      console.log('Welcome email sent:', info.messageId);
+      return true;
     } catch (error) {
-      console.error('Contact email error:', error);
-      throw error;
+      console.error('Welcome email error:', error);
+      throw new Error('Failed to send welcome email: ' + error.message);
     }
   }
 }
 
-module.exports = new EmailService(); 
+// Create and export a single instance
+const emailService = new EmailService();
+module.exports = emailService;

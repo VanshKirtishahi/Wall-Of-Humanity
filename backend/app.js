@@ -36,6 +36,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/donations', require('./routes/donationRoutes'));
 app.use('/api/free-food', require('./routes/freeFoodRoutes'));
+app.use('/api/requests', require('./routes/requestRoutes'));
+app.use('/api/contact', require('./routes/contactRoutes'));
 
 // Error handling
 app.use((err, req, res, next) => {

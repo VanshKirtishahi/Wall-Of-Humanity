@@ -50,13 +50,31 @@ class DonationService {
 
   async createDonation(formData) {
     try {
-      const response = await api.post('/donations', formData, {
+      // If formData is not already FormData, create a new FormData object
+      const data = formData instanceof FormData ? formData : new FormData();
+      
+      // If formData is a plain object, append each field to FormData
+      if (!(formData instanceof FormData)) {
+        Object.keys(formData).forEach(key => {
+          if (formData[key] !== null && formData[key] !== undefined) {
+            // Handle arrays and objects by converting them to JSON strings
+            if (typeof formData[key] === 'object' && !(formData[key] instanceof File)) {
+              data.append(key, JSON.stringify(formData[key]));
+            } else {
+              data.append(key, formData[key]);
+            }
+          }
+        });
+      }
+
+      const response = await api.post('/donations', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       return response.data;
     } catch (error) {
+      console.error('Create donation error:', error);
       if (error.response?.status === 401) {
         window.location.href = '/login';
       }
@@ -154,7 +172,24 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.post('/donations', formData, {
+      // If formData is not already FormData, create a new FormData object
+      const data = formData instanceof FormData ? formData : new FormData();
+      
+      // If formData is a plain object, append each field to FormData
+      if (!(formData instanceof FormData)) {
+        Object.keys(formData).forEach(key => {
+          if (formData[key] !== null && formData[key] !== undefined) {
+            // Handle arrays and objects by converting them to JSON strings
+            if (typeof formData[key] === 'object' && !(formData[key] instanceof File)) {
+              data.append(key, JSON.stringify(formData[key]));
+            } else {
+              data.append(key, formData[key]);
+            }
+          }
+        });
+      }
+
+      const response = await api.post('/donations', data, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'multipart/form-data'
@@ -163,6 +198,7 @@ class DonationService {
 
       return response.data;
     } catch (error) {
+      console.error('Create donation with image error:', error);
       throw error;
     }
   }

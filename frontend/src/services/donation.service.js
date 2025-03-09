@@ -62,37 +62,59 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      // If formData is not already FormData, create a new FormData object
-      const data = formData instanceof FormData ? formData : new FormData();
+      // Create a new FormData instance
+      const data = new FormData();
       
-      // If formData is a plain object, append each field to FormData
-      if (!(formData instanceof FormData)) {
-        Object.keys(formData).forEach(key => {
-          if (formData[key] !== null && formData[key] !== undefined) {
-            // Handle arrays and objects by converting them to JSON strings
-            if (typeof formData[key] === 'object' && !(formData[key] instanceof File)) {
-              data.append(key, JSON.stringify(formData[key]));
-            } else {
-              data.append(key, formData[key]);
-            }
-          }
-        });
+      // Handle regular form fields
+      const fields = ['type', 'title', 'description', 'quantity', 'foodType', 'status'];
+      fields.forEach(field => {
+        if (formData[field]) {
+          data.append(field, formData[field]);
+        }
+      });
+
+      // Handle nested objects
+      if (formData.availability) {
+        data.append('availability', JSON.stringify(formData.availability));
+      }
+      if (formData.location) {
+        data.append('location', JSON.stringify(formData.location));
       }
 
-      // Add user ID to the form data - check both possible locations
-      if (!data.has('userId')) {
-        const userId = user._id || user.id;
-        if (!userId) {
-          console.error('User ID not found in:', user);
-          throw new Error('User ID not found');
+      // Handle images
+      if (formData.images && formData.images.length > 0) {
+        // Convert base64 to Blob and append
+        for (let i = 0; i < formData.images.length; i++) {
+          const imageData = formData.images[i];
+          if (imageData.startsWith('data:image')) {
+            // Convert base64 to Blob
+            const byteString = atob(imageData.split(',')[1]);
+            const mimeString = imageData.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            data.append('images', blob, `image${i + 1}.${mimeString.split('/')[1]}`);
+          } else if (imageData instanceof File) {
+            data.append('images', imageData);
+          }
         }
-        data.append('userId', userId);
       }
+
+      // Add user ID
+      const userId = user._id || user.id;
+      if (!userId) {
+        console.error('User ID not found in:', user);
+        throw new Error('User ID not found');
+      }
+      data.append('userId', userId);
 
       // Log form data contents for debugging
       console.log('Creating donation with data:');
       for (let pair of data.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+        console.log(pair[0] + ': ' + (pair[0] === 'images' ? 'Image data...' : pair[1]));
       }
 
       // Validate required fields
@@ -108,7 +130,7 @@ class DonationService {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'multipart/form-data'
         },
-        timeout: 10000 // 10 second timeout
+        timeout: 30000 // 30 second timeout for image upload
       });
 
       console.log('Server response:', response);
@@ -135,7 +157,7 @@ class DonationService {
       }
       
       if (error.response?.status === 500) {
-        throw new Error('Server error - Please try again later or contact support if the problem persists');
+        throw new Error('Server error - The image might be too large or in an unsupported format. Please try with a smaller image or a different format.');
       }
 
       if (error.message.includes('Missing required field')) {

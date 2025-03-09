@@ -11,6 +11,11 @@ const api = axios.create({
 // Add request interceptor for auth token
 api.interceptors.request.use(
   (config) => {
+    // Add /api prefix to all requests except those that already have it
+    if (!config.url.startsWith('/api/')) {
+      config.url = `/api${config.url}`;
+    }
+
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

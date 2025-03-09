@@ -67,18 +67,23 @@ class DonationService {
         });
       }
 
-      const response = await api.post('/donations', data, {
+      const response = await api.post('donations', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      return response.data;
+
+      if (response.status === 201 && response.data) {
+        return response.data;
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Create donation error:', error);
       if (error.response?.status === 401) {
         window.location.href = '/login';
       }
-      throw error;
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create donation');
     }
   }
 

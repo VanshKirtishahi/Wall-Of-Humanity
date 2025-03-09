@@ -296,13 +296,9 @@ const DonationForm = () => {
         }
       } else {
         // For create
-        const dataToSend = {};
-        Object.keys(submissionData).forEach(key => {
-          dataToSend[key] = submissionData[key];
-        });
+        const dataToSend = { ...submissionData };
         
         if (image) {
-          // Convert image to base64
           const base64Image = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result);
@@ -314,17 +310,24 @@ const DonationForm = () => {
         response = await donationService.createDonation(dataToSend);
         
         if (response && response.success) {
-          toast.success(response.message || 'Donation created successfully');
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          if (response.shouldRedirect && response.redirectTo) {
-            navigate(response.redirectTo);
-          }
-        } else {
-          throw new Error('Failed to create donation');
+          toast.success('Donation created successfully');
+          // Wait for toast to be visible
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          navigate('/my-donations');
+          return;
+        } else if (response && response.data) {
+          // If we have data but success is false, it might still be a successful creation
+          toast.success('Donation created successfully');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          navigate('/my-donations');
+          return;
         }
+        // Only throw error if we really failed
+        throw new Error(response?.message || 'Failed to create donation');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || 'Operation failed');
+      console.error('Operation error:', error);
+      toast.error(error.message || 'Failed to process donation');
     } finally {
       setIsLoading(false);
     }

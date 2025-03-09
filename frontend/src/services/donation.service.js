@@ -3,7 +3,7 @@ import api from '../config/axios';
 class DonationService {
   async getAllDonations() {
     try {
-      const response = await api.get('/donations');
+      const response = await api.get('donations');
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch donations');
@@ -23,7 +23,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.get('/donations/my-donations', {
+      const response = await api.get('donations/my-donations', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }

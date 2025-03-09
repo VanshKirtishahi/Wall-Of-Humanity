@@ -30,20 +30,9 @@ api.interceptors.request.use(
     if (!config.headers['Content-Type']?.includes('multipart/form-data')) {
       config.headers['Content-Type'] = 'application/json';
     }
-
-    // Log the final URL for debugging
-    const finalUrl = `${config.baseURL}${config.url}`;
-    console.log('Making request to:', finalUrl);
-    console.log('Request config:', {
-      method: config.method,
-      headers: config.headers,
-      data: config.data
-    });
-    
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -51,27 +40,16 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log('Response received:', {
-      status: response.status,
-      url: response.config.url,
-      data: response.data
-    });
     return response;
   },
   (error) => {
-    // Log detailed error information
-    console.error('API Error:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        baseURL: error.config?.baseURL,
-        headers: error.config?.headers
-      }
-    });
+    // Only log critical errors
+    if (error.response?.status >= 500) {
+      console.error('Server Error:', {
+        status: error.response.status,
+        message: error.response.data?.message || error.message
+      });
+    }
 
     if (error.response?.status === 401) {
       localStorage.removeItem('token');

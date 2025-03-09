@@ -286,8 +286,8 @@ const DonationForm = () => {
 
           if (response && response.donation) {
             toast.success('Donation updated successfully!');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            window.location.href = '/my-donations';
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            navigate('/my-donations');
           } else {
             throw new Error('Invalid response from server');
           }
@@ -309,24 +309,16 @@ const DonationForm = () => {
         
         response = await donationService.createDonation(dataToSend);
         
-        if (response && response.success) {
-          toast.success('Donation created successfully');
-          // Wait for toast to be visible
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          navigate('/my-donations');
-          return;
-        } else if (response && response.data) {
-          // If we have data but success is false, it might still be a successful creation
+        if (response && (response.success || response.data)) {
           toast.success('Donation created successfully');
           await new Promise(resolve => setTimeout(resolve, 1000));
           navigate('/my-donations');
           return;
         }
-        // Only throw error if we really failed
+        
         throw new Error(response?.message || 'Failed to create donation');
       }
     } catch (error) {
-      console.error('Operation error:', error);
       toast.error(error.message || 'Failed to process donation');
     } finally {
       setIsLoading(false);

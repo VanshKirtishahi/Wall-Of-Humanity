@@ -130,19 +130,12 @@ class DonationService {
       // Add user ID
       const userId = user._id || user.id;
       if (!userId) {
-        console.error('User ID not found in:', user);
         return {
           success: false,
           message: 'User ID not found'
         };
       }
       data.append('userId', userId);
-
-      // Log form data contents for debugging
-      console.log('Creating donation with data:');
-      for (let pair of data.entries()) {
-        console.log(pair[0] + ': ' + (pair[0] === 'images' ? 'Image data...' : pair[1]));
-      }
 
       // Validate required fields
       const requiredFields = ['type', 'title', 'description', 'userId'];
@@ -163,16 +156,8 @@ class DonationService {
         timeout: 30000 // 30 second timeout for image upload
       });
 
-      // Log the response for debugging
-      console.log('Server response:', {
-        status: response.status,
-        data: response.data,
-        headers: response.headers
-      });
-
       // For any successful response (2xx status codes)
       if (response.status >= 200 && response.status < 300) {
-        console.log('Donation created successfully');
         return {
           success: true,
           data: response.data,
@@ -190,12 +175,13 @@ class DonationService {
       };
 
     } catch (error) {
-      console.error('Create donation error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
-      });
+      // Only log critical errors
+      if (error.response?.status >= 500) {
+        console.error('Server Error:', {
+          status: error.response.status,
+          message: error.response.data?.message || error.message
+        });
+      }
       
       // Check if the donation was actually created despite the error
       if (error.response?.status >= 200 && error.response?.status < 300) {

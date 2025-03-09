@@ -84,6 +84,20 @@ class DonationService {
         data.append('userId', user.id);
       }
 
+      // Log form data contents for debugging
+      console.log('Creating donation with data:');
+      for (let pair of data.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      // Validate required fields
+      const requiredFields = ['type', 'title', 'description'];
+      for (let field of requiredFields) {
+        if (!data.has(field)) {
+          throw new Error(`Missing required field: ${field}`);
+        }
+      }
+
       const response = await api.post('/api/donations', data, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
@@ -92,28 +106,40 @@ class DonationService {
         timeout: 10000 // 10 second timeout
       });
 
+      console.log('Server response:', response);
+
       if (response.status === 201 && response.data) {
         return response.data;
       } else {
+        console.error('Invalid response:', response);
         throw new Error('Invalid response from server');
       }
     } catch (error) {
-      console.error('Create donation error:', error);
+      console.error('Create donation error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
       
       if (error.response?.status === 401) {
         localStorage.removeItem('user');
         window.location.href = '/login';
-        throw new Error('Authentication required');
+        throw new Error('Authentication required - Please log in again');
       }
       
       if (error.response?.status === 500) {
-        throw new Error('Server error. Please try again later.');
+        throw new Error('Server error - Please try again later or contact support if the problem persists');
+      }
+
+      if (error.message.includes('Missing required field')) {
+        throw error;
       }
 
       throw new Error(
         error.response?.data?.message || 
         error.message || 
-        'Failed to create donation'
+        'Failed to create donation. Please check all required fields and try again.'
       );
     }
   }

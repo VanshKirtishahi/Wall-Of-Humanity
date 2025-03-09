@@ -313,10 +313,12 @@ const DonationForm = () => {
         
         response = await donationService.createDonation(dataToSend);
         
-        if (response && response.donation) {
-          toast.success('Donation created successfully!');
+        if (response && response.success) {
+          toast.success(response.message || 'Donation created successfully');
           await new Promise(resolve => setTimeout(resolve, 2000));
-          window.location.href = '/my-donations';
+          if (response.shouldRedirect && response.redirectTo) {
+            navigate(response.redirectTo);
+          }
         } else {
           throw new Error('Failed to create donation');
         }

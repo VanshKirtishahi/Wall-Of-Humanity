@@ -182,10 +182,10 @@ class DonationService {
         };
       }
 
-      // If response wasn't successful but didn't throw an error
+      // If we get here, it means we got a non-2xx response without an error
       return {
         success: false,
-        message: 'Failed to create donation',
+        message: response.data?.message || 'Failed to create donation',
         shouldRedirect: false
       };
 
@@ -208,6 +208,7 @@ class DonationService {
         };
       }
 
+      // Handle specific error cases
       if (error.response?.status === 401) {
         localStorage.removeItem('user');
         return {
@@ -222,14 +223,6 @@ class DonationService {
         return {
           success: false,
           message: 'Server error - The image might be too large or in an unsupported format. Please try with a smaller image.',
-          shouldRedirect: false
-        };
-      }
-
-      if (error.message.includes('Missing required field')) {
-        return {
-          success: false,
-          message: error.message,
           shouldRedirect: false
         };
       }

@@ -23,7 +23,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.get('/donations/my-donations', {
+      const response = await api.get('/api/donations/my-donations', {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -41,7 +41,7 @@ class DonationService {
 
   async getDonationById(id) {
     try {
-      const response = await api.get(`/donations/${id}`);
+      const response = await api.get(`/api/donations/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -50,7 +50,7 @@ class DonationService {
 
   async createDonation(formData) {
     try {
-      const response = await api.post('/donations', formData, {
+      const response = await api.post('/api/donations', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -81,10 +81,9 @@ class DonationService {
       };
 
       if (updateData instanceof FormData) {
-
-        const response = await api.patch(`/donations/${id}`, updateData, {
+        const response = await api.patch(`/api/donations/${id}`, updateData, {
           headers: headers,
-          timeout: 10000 // 10 second timeout
+          timeout: 10000
         });
         
         if (!response.data || !response.data.donation) {
@@ -93,13 +92,12 @@ class DonationService {
 
         return response.data;
       } else {
-        
         headers['Content-Type'] = 'application/json';
         const processedData = typeof updateData === 'string' ? updateData : JSON.stringify(updateData);
         
-        const response = await api.patch(`/donations/${id}`, processedData, { 
+        const response = await api.patch(`/api/donations/${id}`, processedData, { 
           headers: headers,
-          timeout: 10000 // 10 second timeout
+          timeout: 10000
         });
         
         if (!response.data || !response.data.donation) {
@@ -129,7 +127,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.delete(`/donations/${id}`, {
+      const response = await api.delete(`/api/donations/${id}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -156,7 +154,7 @@ class DonationService {
         throw new Error('Authentication required');
       }
 
-      const response = await api.post('/donations', formData, {
+      const response = await api.post('/api/donations', formData, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'multipart/form-data'
@@ -171,7 +169,7 @@ class DonationService {
 
   async getStats() {
     try {
-      const response = await api.get('/donations/stats'); 
+      const response = await api.get('/api/donations/stats'); 
       
       if (!response.data) {
         throw new Error('No data received');

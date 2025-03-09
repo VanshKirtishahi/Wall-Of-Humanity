@@ -1,8 +1,8 @@
-import api from './api';
+import api from '../config/axios';
 
 const getAllNGOs = async () => {
   try {
-    const response = await api.get('/ngos');
+    const response = await api.get('/api/ngos');
     return response.data;
   } catch (error) {
     console.error('Error fetching NGOs:', error);
@@ -12,7 +12,7 @@ const getAllNGOs = async () => {
 
 const registerNGO = async (formData) => {
   try {
-    const response = await api.post('/ngos/register', formData, {
+    const response = await api.post('/api/ngos/register', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -27,7 +27,7 @@ const registerNGO = async (formData) => {
 
 const updateNGOStatus = async (ngoId, status) => {
   try {
-    const response = await api.patch(`/ngos/${ngoId}/status`, { status });
+    const response = await api.patch(`/api/ngos/${ngoId}/status`, { status });
     return response.data;
   } catch (error) {
     console.error('Error updating NGO status:', error);
@@ -38,7 +38,7 @@ const updateNGOStatus = async (ngoId, status) => {
 const getNGOProfile = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await api.get('/ngos/profile', {
+    const response = await api.get('/api/ngos/profile', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

@@ -3,7 +3,7 @@ import api from '../config/axios';
 class FreeFoodService {
   async getAllListings() {
     try {
-      const response = await api.get('free-food');
+      const response = await api.get('/api/free-food');
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch free food listings');
@@ -12,7 +12,7 @@ class FreeFoodService {
 
   async getListing(id) {
     try {
-      const response = await api.get(`free-food/${id}`);
+      const response = await api.get(`/api/free-food/${id}`);
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch listing');
@@ -21,7 +21,7 @@ class FreeFoodService {
 
   async createListing(formData) {
     try {
-      const response = await api.post('free-food', formData, {
+      const response = await api.post('/api/free-food', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -34,7 +34,7 @@ class FreeFoodService {
 
   async updateListing(id, formData) {
     try {
-      const response = await api.put(`free-food/${id}`, formData, {
+      const response = await api.put(`/api/free-food/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -47,7 +47,7 @@ class FreeFoodService {
 
   async deleteListing(id) {
     try {
-      const response = await api.delete(`free-food/${id}`);
+      const response = await api.delete(`/api/free-food/${id}`);
       return response.data;
     } catch (error) {
       throw new Error('Failed to delete listing');

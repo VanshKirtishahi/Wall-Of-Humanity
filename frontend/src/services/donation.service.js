@@ -50,6 +50,18 @@ class DonationService {
 
   async createDonation(formData) {
     try {
+      // Check for authentication
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        throw new Error('Authentication required');
+      }
+
+      const user = JSON.parse(userData);
+      if (!user || !user.token) {
+        localStorage.removeItem('user');
+        throw new Error('Authentication required');
+      }
+
       // If formData is not already FormData, create a new FormData object
       const data = formData instanceof FormData ? formData : new FormData();
       
@@ -67,10 +79,17 @@ class DonationService {
         });
       }
 
+      // Add user ID to the form data
+      if (!data.has('userId')) {
+        data.append('userId', user.id);
+      }
+
       const response = await api.post('/api/donations', data, {
         headers: {
+          'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'multipart/form-data'
-        }
+        },
+        timeout: 10000 // 10 second timeout
       });
 
       if (response.status === 201 && response.data) {
@@ -80,10 +99,22 @@ class DonationService {
       }
     } catch (error) {
       console.error('Create donation error:', error);
+      
       if (error.response?.status === 401) {
+        localStorage.removeItem('user');
         window.location.href = '/login';
+        throw new Error('Authentication required');
       }
-      throw new Error(error.response?.data?.message || error.message || 'Failed to create donation');
+      
+      if (error.response?.status === 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+
+      throw new Error(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to create donation'
+      );
     }
   }
 

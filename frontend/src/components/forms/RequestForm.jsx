@@ -104,6 +104,16 @@ const RequestForm = () => {
     setError("");
 
     try {
+      // Validate required fields
+      const requiredFields = ['requestorName', 'contactNumber', 'address', 'reason'];
+      const missingFields = requiredFields.filter(field => !formData[field]);
+      
+      if (missingFields.length > 0) {
+        toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        setIsSubmitting(false);
+        return;
+      }
+
       const requestData = {
         donation: donationId,
         requestorName: formData.requestorName,
@@ -111,80 +121,54 @@ const RequestForm = () => {
         address: formData.address,
         reason: formData.reason,
         urgency: formData.urgency,
-        status: "pending"
+        status: "pending",
+        user: user._id // Make sure user ID is included
       };
       
+      // Log the request data before submission
+      console.log('Submitting request with data:', requestData);
+      
       const response = await requestService.createRequest(requestData);
+      console.log('Request creation response:', response);
 
-      // Update donation status
-      try {
-        await donationService.updateDonation(donationId, {
-          status: 'requested'
+      if (response && response.request) {
+        // Update donation status
+        try {
+          await donationService.updateDonation(donationId, {
+            status: 'requested'
+          });
+          
+          setDonation(prev => ({
+            ...prev,
+            status: 'requested'
+          }));
+        } catch (updateError) {
+          console.error('Failed to update donation status:', updateError);
+        }
+
+        setShowSuccess(true);
+        Swal.fire({
+          title: 'Request Submitted Successfully!',
+          text: 'Your donation request has been received.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#6B46C1'
+        }).then(() => {
+          navigate('/', { 
+            state: { 
+              requestSuccess: true,
+              updatedDonationId: donationId,
+              updatedStatus: 'requested'
+            } 
+          });
         });
-        
-        // Update local donation state
-        setDonation(prev => ({
-          ...prev,
-          status: 'requested'
-        }));
-      } catch (updateError) {
-        console.error('Failed to update donation status:', updateError);
+      } else {
+        throw new Error('Invalid response from server');
       }
-
-      // Send email notification
-      try {
-        const emailData = {
-          name: formData.requestorName,
-          email: formData.email || user.email,
-          message: `
-            <h2>New Donation Request</h2>
-            <h3>Donation Details:</h3>
-            <p>Title: ${donation.donation?.title || donation.title || 'Not specified'}</p>
-            <p>Type: ${donation.donation?.type || donation.type || 'Not specified'}</p>
-            <p>Quantity: ${donation.donation?.quantity || donation.quantity || 'Not specified'}</p>
-            <p>Description: ${donation.donation?.description || donation.description || 'Not specified'}</p>
-            <p>Donor Name: ${donation.donation?.donorName || donation.donorName || 'Anonymous'}</p>
-
-            <h3>Requester Details:</h3>
-            <p>Name: ${formData.requestorName}</p>
-            <p>Contact: ${formData.contactNumber}</p>
-            <p>Address: ${formData.address}</p>
-            <p>Reason: ${formData.reason}</p>
-            <p>Urgency: ${formData.urgency}</p>
-          `
-        };
-
-        await fetch(`${import.meta.env.VITE_API_URL}/email/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailData),
-        });
-      } catch (emailError) {
-        console.error('Failed to send email notification:', emailError);
-      }
-
-      setShowSuccess(true);
-      Swal.fire({
-        title: 'Request Submitted Successfully!',
-        text: 'Your donation request has been received.',
-        icon: 'success',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#6B46C1'
-      }).then(() => {
-        navigate('/', { 
-          state: { 
-            requestSuccess: true,
-            updatedDonationId: donationId,
-            updatedStatus: 'requested'
-          } 
-        });
-      });
-
     } catch (error) {
       console.error('Request submission error:', error);
-      toast.error(error.response?.data?.message || 'Failed to submit request');
+      toast.error(error.message || 'Failed to submit request');
+      setError(error.message || 'Failed to submit request');
     } finally {
       setIsSubmitting(false);
     }

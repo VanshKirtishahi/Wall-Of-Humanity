@@ -133,15 +133,22 @@ class DonationService {
         timeout: 30000 // 30 second timeout for image upload
       });
 
-      console.log('Server response:', response);
+      // Log the response for debugging
+      console.log('Server response:', {
+        status: response.status,
+        data: response.data,
+        headers: response.headers
+      });
 
-      if (response.status === 201 && response.data) {
-        console.log('Donation created successfully:', response.data);
+      // Check if the request was successful (status 201 Created)
+      if (response.status === 201) {
+        console.log('Donation created successfully');
         return response.data;
       }
 
-      console.error('Invalid response:', response);
-      throw new Error('Invalid response from server');
+      // If we get here, something unexpected happened
+      console.error('Unexpected response:', response);
+      throw new Error('Unexpected response from server');
     } catch (error) {
       console.error('Create donation error details:', {
         message: error.message,
@@ -164,10 +171,16 @@ class DonationService {
         throw error;
       }
 
+      // If the donation was actually created (status 201) but we got here due to some other issue
+      if (error.response?.status === 201) {
+        console.log('Donation was created despite error');
+        return error.response.data;
+      }
+
       throw new Error(
         error.response?.data?.message || 
         error.message || 
-        'Failed to create donation. Please check all required fields and try again.'
+        'An unexpected error occurred while creating the donation.'
       );
     }
   }

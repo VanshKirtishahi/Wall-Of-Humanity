@@ -79,9 +79,14 @@ class DonationService {
         });
       }
 
-      // Add user ID to the form data
+      // Add user ID to the form data - check both possible locations
       if (!data.has('userId')) {
-        data.append('userId', user.id);
+        const userId = user._id || user.id;
+        if (!userId) {
+          console.error('User ID not found in:', user);
+          throw new Error('User ID not found');
+        }
+        data.append('userId', userId);
       }
 
       // Log form data contents for debugging
@@ -91,7 +96,7 @@ class DonationService {
       }
 
       // Validate required fields
-      const requiredFields = ['type', 'title', 'description'];
+      const requiredFields = ['type', 'title', 'description', 'userId'];
       for (let field of requiredFields) {
         if (!data.has(field)) {
           throw new Error(`Missing required field: ${field}`);
@@ -109,11 +114,12 @@ class DonationService {
       console.log('Server response:', response);
 
       if (response.status === 201 && response.data) {
+        console.log('Donation created successfully:', response.data);
         return response.data;
-      } else {
-        console.error('Invalid response:', response);
-        throw new Error('Invalid response from server');
       }
+
+      console.error('Invalid response:', response);
+      throw new Error('Invalid response from server');
     } catch (error) {
       console.error('Create donation error details:', {
         message: error.message,

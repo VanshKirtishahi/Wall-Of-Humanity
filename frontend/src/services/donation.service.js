@@ -140,15 +140,19 @@ class DonationService {
         headers: response.headers
       });
 
-      // Check if the request was successful (status 201 Created)
-      if (response.status === 201) {
+      // For any successful response (2xx status codes)
+      if (response.status >= 200 && response.status < 300) {
         console.log('Donation created successfully');
-        return response.data;
+        return {
+          success: true,
+          data: response.data,
+          message: 'Donation created successfully',
+          shouldRedirect: true,
+          redirectTo: '/my-donations'
+        };
       }
 
-      // If we get here, something unexpected happened
-      console.error('Unexpected response:', response);
-      throw new Error('Unexpected response from server');
+      throw new Error('Failed to create donation');
     } catch (error) {
       console.error('Create donation error details:', {
         message: error.message,
@@ -157,31 +161,48 @@ class DonationService {
         headers: error.response?.headers
       });
       
+      // Check if the donation was actually created despite the error
+      if (error.response?.status >= 200 && error.response?.status < 300) {
+        return {
+          success: true,
+          data: error.response.data,
+          message: 'Donation created successfully',
+          shouldRedirect: true,
+          redirectTo: '/my-donations'
+        };
+      }
+
       if (error.response?.status === 401) {
         localStorage.removeItem('user');
-        window.location.href = '/login';
-        throw new Error('Authentication required - Please log in again');
+        return {
+          success: false,
+          message: 'Authentication required - Please log in again',
+          shouldRedirect: true,
+          redirectTo: '/login'
+        };
       }
       
       if (error.response?.status === 500) {
-        throw new Error('Server error - The image might be too large or in an unsupported format. Please try with a smaller image or a different format.');
+        return {
+          success: false,
+          message: 'Server error - The image might be too large or in an unsupported format. Please try with a smaller image.',
+          shouldRedirect: false
+        };
       }
 
       if (error.message.includes('Missing required field')) {
-        throw error;
+        return {
+          success: false,
+          message: error.message,
+          shouldRedirect: false
+        };
       }
 
-      // If the donation was actually created (status 201) but we got here due to some other issue
-      if (error.response?.status === 201) {
-        console.log('Donation was created despite error');
-        return error.response.data;
-      }
-
-      throw new Error(
-        error.response?.data?.message || 
-        error.message || 
-        'An unexpected error occurred while creating the donation.'
-      );
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'An unexpected error occurred',
+        shouldRedirect: false
+      };
     }
   }
 

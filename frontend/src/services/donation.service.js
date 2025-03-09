@@ -3,7 +3,7 @@ import api from '../config/axios';
 class DonationService {
   async getAllDonations() {
     try {
-      const response = await api.get('/donations');
+      const response = await api.get('/api/donations');
       return response.data;
     } catch (error) {
       throw new Error('Failed to fetch donations');

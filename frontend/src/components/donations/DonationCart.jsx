@@ -25,14 +25,15 @@ const DonationCart = () => {
         
         // Update donation status if coming from request form
         if (location.state?.updatedDonationId && location.state?.updatedStatus) {
-          donationsData = donationsData.map(donation => 
+          const updatedDonations = donationsData.map(donation => 
             donation._id === location.state.updatedDonationId 
               ? { ...donation, status: location.state.updatedStatus }
               : donation
           );
+          setDonations(updatedDonations);
+        } else {
+          setDonations(donationsData);
         }
-        
-        setDonations(donationsData);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to fetch data');

@@ -173,7 +173,7 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        await api.delete('/auth/profile');
+        await api.delete('/auth/profile/delete');
         localStorage.clear();
         logout();
         toast.success('Account deleted successfully');

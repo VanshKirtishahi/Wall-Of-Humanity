@@ -52,8 +52,9 @@ const RequestForm = () => {
     const fetchDonationDetails = async () => {
       if (donationId) {
         try {
-          const donationData = await donationService.getDonationById(donationId);
-          setDonation(donationData);
+          const response = await donationService.getDonationById(donationId);
+          // Extract donation from the response
+          setDonation(response.donation);
         } catch (error) {
           console.error('Error fetching donation:', error);
           toast.error('Failed to fetch donation details');
@@ -138,15 +139,18 @@ const RequestForm = () => {
           message: `
             <h2>New Donation Request</h2>
             <h3>Donation Details:</h3>
-            <p>Title: ${donation?.title}</p>
-            <p>Type: ${donation?.type}</p>
-            <p>Description: ${donation?.description}</p>
+            <p>Title: ${donation.donation?.title || donation.title || 'Not specified'}</p>
+            <p>Type: ${donation.donation?.type || donation.type || 'Not specified'}</p>
+            <p>Quantity: ${donation.donation?.quantity || donation.quantity || 'Not specified'}</p>
+            <p>Description: ${donation.donation?.description || donation.description || 'Not specified'}</p>
+            <p>Donor Name: ${donation.donation?.donorName || donation.donorName || 'Anonymous'}</p>
 
             <h3>Requester Details:</h3>
             <p>Name: ${formData.requestorName}</p>
             <p>Contact: ${formData.contactNumber}</p>
             <p>Address: ${formData.address}</p>
             <p>Reason: ${formData.reason}</p>
+            <p>Urgency: ${formData.urgency}</p>
           `
         };
 

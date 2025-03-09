@@ -44,7 +44,6 @@ class DonationService {
       const response = await api.get(`/donations/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Get donation error:', error);
       throw error;
     }
   }
@@ -67,16 +66,54 @@ class DonationService {
 
   async updateDonation(id, updateData) {
     try {
-      const response = await api.patch(`/donations/${id}`, updateData, {
-        headers: {
-          'Content-Type': updateData instanceof FormData ? 'multipart/form-data' : 'application/json',
-          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        throw new Error('Authentication required');
+      }
+
+      const user = JSON.parse(userData);
+      if (!user.token) {
+        throw new Error('Authentication required');
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${user.token}`
+      };
+
+      if (updateData instanceof FormData) {
+
+        const response = await api.patch(`/donations/${id}`, updateData, {
+          headers: headers,
+          timeout: 10000 // 10 second timeout
+        });
+        
+        if (!response.data || !response.data.donation) {
+          throw new Error('Invalid response from server');
         }
-      });
-      return response.data;
+
+        return response.data;
+      } else {
+        
+        headers['Content-Type'] = 'application/json';
+        const processedData = typeof updateData === 'string' ? updateData : JSON.stringify(updateData);
+        
+        const response = await api.patch(`/donations/${id}`, processedData, { 
+          headers: headers,
+          timeout: 10000 // 10 second timeout
+        });
+        
+        if (!response.data || !response.data.donation) {
+          throw new Error('Invalid response from server');
+        }
+
+        return response.data;
+      }
     } catch (error) {
-      console.error('Update donation error:', error);
-      throw error;
+      throw new Error(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to update donation'
+      );
     }
   }
 
@@ -128,7 +165,6 @@ class DonationService {
 
       return response.data;
     } catch (error) {
-      console.error('Create donation error:', error);
       throw error;
     }
   }
@@ -149,7 +185,6 @@ class DonationService {
         requestCount: parseInt(response.data.requestCount) || 0
       };
     } catch (error) {
-      console.error('Error fetching stats:', error.response?.data || error);
       throw error;
     }
   }

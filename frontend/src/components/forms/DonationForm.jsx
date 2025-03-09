@@ -24,7 +24,6 @@ const DonationForm = () => {
     images: [],
     createdAt: new Date().toLocaleDateString(),
     availability: {
-      type: 'specific',
       startTime: {
         hours: '12',
         minutes: '00',
@@ -34,8 +33,7 @@ const DonationForm = () => {
         hours: '12',
         minutes: '00',
         period: 'PM'
-      },
-      specificDate: new Date().toISOString().split('T')[0]
+      }
     },
     location: {
       address: '',
@@ -75,6 +73,10 @@ const DonationForm = () => {
             return;
           }
 
+          if (donation.images && donation.images.length > 0) {
+            setImagePreview(donation.images[0]);
+          }
+
           setFormData({
             type: donation.type || 'Food',
             title: donation.title || '',
@@ -84,11 +86,16 @@ const DonationForm = () => {
             images: donation.images || [],
             createdAt: donation.createdAt || new Date().toLocaleDateString(),
             availability: {
-              type: donation.availability?.type || 'specific',
-              startTime: parseTimeFromDatabase(donation.availability?.startTime),
-              endTime: parseTimeFromDatabase(donation.availability?.endTime),
-              specificDate: donation.availability?.specificDate || new Date().toISOString().split('T')[0],
-              notes: donation.availability?.notes || ''
+              startTime: parseTimeFromDatabase(donation.availability?.startTime) || {
+                hours: '12',
+                minutes: '00',
+                period: 'AM'
+              },
+              endTime: parseTimeFromDatabase(donation.availability?.endTime) || {
+                hours: '12',
+                minutes: '00',
+                period: 'PM'
+              }
             },
             location: {
               address: donation.location?.address || '',
@@ -98,21 +105,8 @@ const DonationForm = () => {
               coordinates: donation.location?.coordinates || null
             }
           });
-          
-          if (donation.images && donation.images.length > 0) {
-            setImagePreview(donation.images[0]);
-          }
         } catch (error) {
-          console.error('Error fetching donation:', error);
-          if (error.message === 'Authentication required') {
-            navigate('/login', { 
-              state: { from: `/donation-form/${id}` },
-              replace: true 
-            });
-          } else {
-            toast.error('Failed to fetch donation details');
-            navigate('/my-donations');
-          }
+          toast.error('Failed to fetch donation details');
         }
       }
     };
@@ -177,7 +171,6 @@ const DonationForm = () => {
       });
       return response.data.imageUrls;
     } catch (error) {
-      console.error('Error uploading images:', error);
       toast.error('Failed to upload images');
       return [];
     }
@@ -215,49 +208,121 @@ const DonationForm = () => {
     return `${adjustedHours.toString().padStart(2, '0')}:${timeObj.minutes}`;
   };
 
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          resolve(compressedBase64);
+        };
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const formDataToSend = new FormData();
       const submissionData = {
-        ...formData,
-        user: user._id,
-        userId: user._id,
+        type: formData.type,
+        title: formData.title,
+        description: formData.description,
+        quantity: formData.quantity,
+        foodType: formData.foodType,
+        status: 'available',
         availability: {
-          ...formData.availability,
           startTime: formatTimeForSubmission(formData.availability.startTime),
           endTime: formatTimeForSubmission(formData.availability.endTime)
+        },
+        location: {
+          address: formData.location.address,
+          area: formData.location.area,
+          city: formData.location.city,
+          state: formData.location.state,
+          coordinates: formData.location.coordinates
         }
       };
-      
-      delete submissionData.user;
-      
-      Object.keys(submissionData).forEach(key => {
-        if (key === 'availability' || key === 'location') {
-          formDataToSend.append(key, JSON.stringify(submissionData[key]));
-        } else if (key !== 'images') {
-          formDataToSend.append(key, submissionData[key]);
-        }
-      });
-      
-      if (image) {
-        formDataToSend.append('images', image);
-      }
 
       let response;
       if (id) {
-        response = await donationService.updateDonation(id, formDataToSend);
-      } else {
-        response = await donationService.createDonation(formDataToSend);
-      }
+        const dataToSend = { ...submissionData };
+        
+        if (image) {
+          const compressedImage = await compressImage(image);
+          dataToSend.images = [compressedImage];
+        } else if (formData.images && formData.images.length > 0) {
+          dataToSend.images = formData.images;
+        }
 
-      toast.success(`Donation ${id ? 'updated' : 'created'} successfully!`);
-      navigate('/my-donations');
+        try {
+          response = await donationService.updateDonation(id, dataToSend);
+
+          if (response && response.donation) {
+            toast.success('Donation updated successfully!');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            window.location.href = '/my-donations';
+          } else {
+            throw new Error('Invalid response from server');
+          }
+        } catch (updateError) {
+          throw updateError;
+        }
+      } else {
+        // For create
+        const dataToSend = {};
+        Object.keys(submissionData).forEach(key => {
+          dataToSend[key] = submissionData[key];
+        });
+        
+        if (image) {
+          // Convert image to base64
+          const base64Image = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(image);
+          });
+          dataToSend.images = [base64Image];
+        }
+        
+        response = await donationService.createDonation(dataToSend);
+        
+        if (response && response.donation) {
+          toast.success('Donation created successfully!');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          window.location.href = '/my-donations';
+        } else {
+          throw new Error('Failed to create donation');
+        }
+      }
     } catch (error) {
-      console.error('Submission error:', error);
-      toast.error(error.message || 'Failed to submit donation');
+      toast.error(error.response?.data?.message || error.message || 'Operation failed');
     } finally {
       setIsLoading(false);
     }
@@ -282,29 +347,6 @@ const DonationForm = () => {
       };
     } catch (error) {
       return { hours: '12', minutes: '00', period: 'AM' };
-    }
-  };
-
-  const fetchDonation = async () => {
-    try {
-      setIsLoading(true);
-      const response = await donationService.getDonationById(id);
-      const donation = response.data;
-
-      setFormData({
-        ...formData,
-        ...donation,
-        availability: {
-          ...formData.availability,
-          startTime: parseTimeFromDatabase(donation.availability?.startTime),
-          endTime: parseTimeFromDatabase(donation.availability?.endTime)
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching donation:', error);
-      toast.error('Failed to fetch donation details');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -399,39 +441,9 @@ const DonationForm = () => {
               <div className="bg-gradient-to-r from-purple-50 to-purple-100/30 p-6 rounded-xl shadow-sm">
                 <h3 className="text-xl font-semibold text-purple-900 mb-4 flex items-center">
                   <span className="bg-purple-100 p-2 rounded-lg mr-2">🕒</span>
-                  Availability
+                  Pickup Timing
                 </h3>
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-purple-700">Availability Type</label>
-                    <select
-                      name="availability.type"
-                      value={formData.availability.type}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
-                    >
-                      <option value="specific">Specific Date</option>
-                      <option value="weekdays">Weekdays (Mon-Fri)</option>
-                      <option value="weekend">Weekend (Sat-Sun)</option>
-                      <option value="allDays">All Days</option>
-                    </select>
-                  </div>
-
-                  {formData.availability.type === 'specific' && (
-                    <div>
-                      <label className="block text-sm font-medium text-purple-700 mb-2">Select Date</label>
-                      <input
-                        type="date"
-                        name="availability.specificDate"
-                        value={formData.availability.specificDate}
-                        onChange={handleChange}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="mt-1 block w-full rounded-lg border-purple-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 px-4 py-2"
-                        required={formData.availability.type === 'specific'}
-                      />
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-purple-700">Start Time</label>

@@ -1,6 +1,4 @@
 import api from '../config/axios';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
 class DonationService {
   async getAllDonations() {
@@ -175,7 +173,6 @@ class DonationService {
       // For any successful response (2xx status codes)
       if (response.status >= 200 && response.status < 300) {
         console.log('Donation created successfully');
-        toast.success('Donation created successfully!');
         return {
           success: true,
           data: response.data,
@@ -202,7 +199,6 @@ class DonationService {
       
       // Check if the donation was actually created despite the error
       if (error.response?.status >= 200 && error.response?.status < 300) {
-        toast.success('Donation created successfully!');
         return {
           success: true,
           data: error.response.data,
@@ -214,7 +210,6 @@ class DonationService {
 
       if (error.response?.status === 401) {
         localStorage.removeItem('user');
-        toast.error('Please log in again');
         return {
           success: false,
           message: 'Authentication required - Please log in again',
@@ -224,7 +219,6 @@ class DonationService {
       }
       
       if (error.response?.status === 500) {
-        toast.error('Server error - Please try again with a smaller image');
         return {
           success: false,
           message: 'Server error - The image might be too large or in an unsupported format. Please try with a smaller image.',
@@ -233,7 +227,6 @@ class DonationService {
       }
 
       if (error.message.includes('Missing required field')) {
-        toast.error(error.message);
         return {
           success: false,
           message: error.message,
@@ -241,7 +234,6 @@ class DonationService {
         };
       }
 
-      toast.error('An unexpected error occurred');
       return {
         success: false,
         message: error.response?.data?.message || error.message || 'An unexpected error occurred',

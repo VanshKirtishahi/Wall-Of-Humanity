@@ -11,7 +11,7 @@ const api = axios.create({
 // Add request interceptor for auth token
 api.interceptors.request.use(
   (config) => {
-    // Add /api prefix to all requests except those that already have it
+    // Add /api prefix if not already present
     if (!config.url.startsWith('/api/')) {
       config.url = `/api${config.url}`;
     }
@@ -25,6 +25,9 @@ api.interceptors.request.use(
     if (!config.headers['Content-Type']?.includes('multipart/form-data')) {
       config.headers['Content-Type'] = 'application/json';
     }
+
+    // Log the final URL for debugging
+    console.log('Request URL:', `${config.baseURL}${config.url}`);
     
     return config;
   },
@@ -35,7 +38,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    // Log detailed error information
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL
+      }
+    });
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

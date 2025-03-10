@@ -66,27 +66,50 @@ router.post('/', auth, async (req, res) => {
     // Get requester details
     const requester = await User.findById(req.userId);
 
-    // Send email to donation owner
+    // Send email to donation owner and admin
     try {
       const emailHtml = `
         <h2>New Donation Request</h2>
-        <p>Hello ${donationDoc.user.name},</p>
-        <p>You have received a new request for your donation:</p>
-        <p><strong>Item:</strong> ${donationDoc.title}</p>
-        <p><strong>Requested by:</strong> ${requestorName}</p>
-        <p><strong>Contact Number:</strong> ${contactNumber}</p>
-        <p><strong>Address:</strong> ${address}</p>
-        <p><strong>Reason:</strong> ${reason}</p>
-        <p><strong>Urgency:</strong> ${urgency || 'normal'}</p>
+        <h3>Donor Details:</h3>
+        <ul>
+          <li><strong>Name:</strong> ${donationDoc.user.name}</li>
+          <li><strong>Email:</strong> ${donationDoc.user.email}</li>
+        </ul>
+        <h3>Donation Details:</h3>
+        <ul>
+          <li><strong>Item:</strong> ${donationDoc.title}</li>
+          <li><strong>Description:</strong> ${donationDoc.description || 'Not provided'}</li>
+          <li><strong>Category:</strong> ${donationDoc.category || 'Not specified'}</li>
+          <li><strong>Quantity:</strong> ${donationDoc.quantity || 'Not specified'}</li>
+        </ul>
+        <h3>Requester Details:</h3>
+        <ul>
+          <li><strong>Name:</strong> ${requestorName}</li>
+          <li><strong>Email:</strong> ${requester.email}</li>
+          <li><strong>Contact Number:</strong> ${contactNumber}</li>
+          <li><strong>Address:</strong> ${address}</li>
+          <li><strong>Reason:</strong> ${reason}</li>
+          <li><strong>Urgency:</strong> ${urgency || 'normal'}</li>
+        </ul>
         <p>Please review the request and take appropriate action.</p>
         <br>
         <p>Best regards,</p>
         <p>Wall of Humanity Team</p>
       `;
 
+      // Send to admin
+      await emailService.transporter.sendMail({
+        from: `"Wall of Humanity" <${process.env.EMAIL_USER}>`,
+        to: 'v.vascoders@gmail.com',
+        subject: 'New Donation Request - Admin Notification',
+        html: emailHtml
+      });
+
+      // Send to donor
       await emailService.transporter.sendMail({
         from: `"Wall of Humanity" <${process.env.EMAIL_USER}>`,
         to: donationDoc.user.email,
+        cc: 'v.vascoders@gmail.com',
         subject: 'New Donation Request Received',
         html: emailHtml
       });
@@ -94,15 +117,24 @@ router.post('/', auth, async (req, res) => {
       // Send confirmation email to requester
       const requesterEmailHtml = `
         <h2>Donation Request Confirmation</h2>
-        <p>Hello ${requestorName},</p>
-        <p>Your request for the following donation has been submitted successfully:</p>
-        <p><strong>Item:</strong> ${donationDoc.title}</p>
-        <p><strong>Your Request Details:</strong></p>
+        <h3>Your Details:</h3>
         <ul>
-          <li>Contact Number: ${contactNumber}</li>
-          <li>Address: ${address}</li>
-          <li>Reason: ${reason}</li>
-          <li>Urgency: ${urgency || 'normal'}</li>
+          <li><strong>Name:</strong> ${requestorName}</li>
+          <li><strong>Email:</strong> ${requester.email}</li>
+          <li><strong>Contact Number:</strong> ${contactNumber}</li>
+          <li><strong>Address:</strong> ${address}</li>
+        </ul>
+        <h3>Donation Details:</h3>
+        <ul>
+          <li><strong>Item:</strong> ${donationDoc.title}</li>
+          <li><strong>Description:</strong> ${donationDoc.description || 'Not provided'}</li>
+          <li><strong>Donor Name:</strong> ${donationDoc.user.name}</li>
+        </ul>
+        <h3>Request Details:</h3>
+        <ul>
+          <li><strong>Reason:</strong> ${reason}</li>
+          <li><strong>Urgency:</strong> ${urgency || 'normal'}</li>
+          <li><strong>Status:</strong> Pending</li>
         </ul>
         <p>The donor will be notified and will review your request.</p>
         <p>We will notify you once they take action on your request.</p>
@@ -114,6 +146,7 @@ router.post('/', auth, async (req, res) => {
       await emailService.transporter.sendMail({
         from: `"Wall of Humanity" <${process.env.EMAIL_USER}>`,
         to: requester.email,
+        cc: 'v.vascoders@gmail.com',
         subject: 'Donation Request Confirmation',
         html: requesterEmailHtml
       });

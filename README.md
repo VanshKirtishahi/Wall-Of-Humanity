@@ -1,7 +1,7 @@
 <div align="center">
   <br />
     <a href="/" target="_blank">
-      <img src="Wall Of Humanity Banner.svg" alt="Project Banner">
+      <img src="Banner.svg" alt="Project Banner">
     </a>
   <br />
 </div>

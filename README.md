@@ -1,26 +1,27 @@
 <div align="center">
   <br />
     <a href="/" target="_blank">
-      <img src="Banner .svg" alt="Project Banner">
+      <img src="Wall Of Humanity Banner.svg" alt="Project Banner">
     </a>
   <br />
 </div>
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Our Target SDG Goals](#our-target-sdg-goals)
-3. [About the Project](#about-the-project)
-4. [Our Mission](#our-mission)
-5. [Why This Matters](#why-this-matters)
-6. [What We Do](#what-we-do)
-7. [Free Food Finder](#free-food-finder)
-8. [Tech Stack](#tech-stack)
-9. [Join Us](#join-us)
-10. [Social Media](#social-media)
-11. [Future Development](#future-development)
-12. [About Us](#about-us)
-13. [Setup](#setup)
-
+2. [Problem Statement](#problem-statement)
+3. [Solution](#solution)
+4. [Our Target SDG Goals](#our-target-sdg-goals)
+5. [About the Project](#about-the-project)
+6. [Our Mission](#our-mission)
+7. [Why This Matters](#why-this-matters)
+8. [What We Do](#what-we-do)
+9. [Free Food Finder](#free-food-finder)
+10. [Tech Stack](#tech-stack)
+11. [Join Us](#join-us)
+12. [Social Media](#social-media)
+13. [Future Development](#future-development)
+14. [About Us](#about-us)
+15. [Setup](#setup)
 
 ## <a id="introduction"></a> Introduction
 
@@ -28,24 +29,38 @@ In a world abundant with resources yet marked by unequal distribution, countless
 
 Wall of Humanity is more than just a platform; it's a movement aimed at breaking the cycle of poverty, particularly in rural areas. By redistributing surplus food, clothing, and essential goods, we strive to offer immediate relief while fostering long-term empowerment. Our platform bridges the gap between those who have resources to share and those in need, ensuring that no valuable resource goes to waste.
 
+## <a id="problem-statement"></a> Problem Statement 🎯
+<div align="center">
+  <br />
+    <a href="/" target="_blank">
+      <img src="problemstatementbanner.svg" alt="Project Banner">
+    </a>
+  <br />
+</div>
+
+In many rural areas, people face a persistent struggle to meet basic needs like food, clothing, and essential supplies. Meanwhile, surplus resources in urban regions often go to waste. The lack of a bridge between donors and those in need prevents effective redistribution of these resources, keeping rural families trapped in poverty.
+
+## <a id="solution"></a> Solution 💡
+
+Wall of Humanity provides an innovative, user-friendly platform that connects donors, social workers, and people in need — ensuring surplus resources are efficiently redistributed to rural communities.
 
 ## <a id="our-target-sdg-goals"></a> Our Target SDG Goals 🎯
-<div style="display: flex; justify-content: space-between; align-items: center; ">
+<div style="display: flex; justify-content: space-between; align-items: center;">
   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJeZLWb8w0GeBFMcDx4LwKpJHj1Q-uKybtyA&s" alt="Image 1" style="width: 38%; height: auto;">
   <img src="https://iprt.uneca.org/images/sdg/en/E_Inverted_SDG_goals_02.png?v=WwmY1bcafhkV2cEqgartaUJ75vtFd9JSE0C81JcF4g0" alt="Image 2" style="width: 38%; height: auto;">
 </div>
 
-
-
 Our goal is to reduce food waste by redistributing surplus resources and providing essential items to those in need, fostering a more sustainable and equitable community.
 
 ## <a id="about-the-project"></a> About the Project ℹ️
-**Welcome to **Wall of Humanity**!
 
-Our platform is designed to tackle two major issues:** food and poverty. We believe in the power of community and sustainability, so we've created a space where people can donate items they no longer need, like clothes and food, to help those who truly need them. By connecting donors, social workers, and NGOs, we ensure that these items find their way to the people who need them most. People can join us as the volunteer to help us.
+**Welcome to Wall of Humanity!**
+
+Our platform is designed to tackle two major issues: food and poverty. We believe in the power of community and sustainability, so we've created a space where people can donate items they no longer need, like clothes and food, to help those who truly need them. By connecting donors, social workers, and NGOs, we ensure that these items find their way to the people who need them most. People can join us as volunteers to help us.
 
 ## <a id="our-mission"></a> Our Mission
-At **Wall of Humanity**, our mission is simple: reduce waste and empower communities. We're here to help break the cycle of poverty by redistributing surplus resources to those in need, especially in rural areas. Together, we can build a more sustainable and compassionate world. Our project reduces the wastage of and resources.
+
+At **Wall of Humanity**, our mission is simple: reduce waste and empower communities. We're here to help break the cycle of poverty by redistributing surplus resources to those in need, especially in rural areas. Together, we can build a more sustainable and compassionate world.
 
 ## <a id="why-this-matters"></a> Why This Matters
 
@@ -64,9 +79,9 @@ We reduce waste by giving items a second life, helping those in need while contr
 
 ### Impact on Communities 🌍
 Our project helps people focus on education and healthcare by providing basic necessities:
-- Food donations allow families to redirect funds to education
-- Clothing donations help maintain dignity and warmth
-- Essential goods support daily needs in underserved areas
+- Food donations allow families to redirect funds to education.
+- Clothing donations help maintain dignity and warmth.
+- Essential goods support daily needs in underserved areas.
 
 ## <a id="free-food-finder"></a> Free Food Finder 🍽️  
 
@@ -96,24 +111,22 @@ This tool is a step forward in ensuring no one goes hungry while making efficien
 - **Database**: MongoDB
 - **Google Tools**:
   - **Google Maps API**: Location services and geolocation
-  - **Google Cloud Platform**: Hosting and cloud services
   - **Google Places API**: Nearby place discovery
-  - **Google Analytics**: User behavior tracking
 
 ## <a id="join-us"></a> Join Us 🤝
 
 ### How You Can Contribute
 1. **As a Donor**  
-   - Donate clothes, food, or essentials through our platform
-   - Track your impact through donation receipts
+   - Donate clothes, food, or essentials through our platform.
+   - Track your impact through donation receipts.
 
 2. **As a Volunteer**  
-   - Assist with collection and distribution
-   - Help verify donation sources
+   - Assist with collection and distribution.
+   - Help verify donation sources.
 
 3. **As a Partner NGO**  
-   - Collaborate on distribution networks
-   - Access our donor database
+   -  Match Donors with Requesters: Helps connect donors to verified requesters.
+   - Verify Free Food Spots: Ensures listed food locations are legitimate and safe.
 
 ### <a id="social-media"></a> Social Media
 
@@ -122,7 +135,6 @@ This tool is a step forward in ensuring no one goes hungry while making efficien
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vansh-kirtishahi)
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/WzJqAbYjWv)
 [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/V_VasCoders?t=vF8YDYUsFYOSPLhGQjwgDg&s=09)
-
 
 By following us on social media, you can:  
 - Get inspired by the impact we're making together.  
@@ -134,14 +146,14 @@ Let's spread kindness, one click at a time! 💕
 ## <a id="future-development"></a> 🚀 Future Development
 
 - **Recognition Programs**:
-  - Volunteer appreciation certificates
-  - Food/clothing coupons for recipients
-  - Scholarship programs for education
+  - Volunteer appreciation certificates.
+  - Food/clothing coupons for volunteer.
+  - Scholarship programs for education.
 
 - **Platform Enhancements**:
-  - Real-time donation tracking
-  - Mobile app development
-  - Multi-language support
+  - Real-time donation tracking.
+  - Mobile app development.
+  - Multi-language support.
 
 ## About Us
 <div align="center">

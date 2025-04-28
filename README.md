@@ -27,7 +27,7 @@
 
 In a world abundant with resources yet marked by unequal distribution, countless individuals continue to face hunger and poverty. At the same time, rising food and clothing waste contributes to environmental damage and represents missed opportunities to support those in need. This imbalance is what inspired us to create Wall of Humanity a platform committed to connecting donors with underserved communities, promoting sustainability and compassion.
 
-Wall of Humanity is more than just a platform; it's a movement aimed at breaking the cycle of poverty, particularly in rural areas. By redistributing surplus food, clothing, and essential goods, we strive to offer immediate relief while fostering long-term empowerment. Our platform bridges the gap between those who have resources to share and those in need, ensuring that no valuable resource goes to waste.
+Wall of Humanity is more than just a platform it's a movement aimed at breaking the cycle of poverty, particularly in rural areas. By redistributing surplus food, clothing, and essential goods, we strive to offer immediate relief while fostering long-term empowerment. Our platform bridges the gap between those who have resources to share and those in need, ensuring that no valuable resource goes to waste.
 
 ## <a id="problem-statement"></a> Problem Statement 🎯
 <div align="center">

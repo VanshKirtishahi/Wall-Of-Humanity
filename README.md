@@ -25,7 +25,7 @@
 
 ## <a id="introduction"></a> Introduction
 
-In a world abundant with resources yet marked by unequal distribution, countless individuals continue to face hunger and poverty. At the same time, rising food and clothing waste contributes to environmental damage and represents missed opportunities to support those in need. This imbalance is what inspired us to create Wall of Humanity—a platform committed to connecting donors with underserved communities, promoting sustainability and compassion.
+In a world abundant with resources yet marked by unequal distribution, countless individuals continue to face hunger and poverty. At the same time, rising food and clothing waste contributes to environmental damage and represents missed opportunities to support those in need. This imbalance is what inspired us to create Wall of Humanity a platform committed to connecting donors with underserved communities, promoting sustainability and compassion.
 
 Wall of Humanity is more than just a platform; it's a movement aimed at breaking the cycle of poverty, particularly in rural areas. By redistributing surplus food, clothing, and essential goods, we strive to offer immediate relief while fostering long-term empowerment. Our platform bridges the gap between those who have resources to share and those in need, ensuring that no valuable resource goes to waste.
 
@@ -42,7 +42,7 @@ In many rural areas, people face a persistent struggle to meet basic needs like 
 
 ## <a id="solution"></a> Solution 💡
 
-Wall of Humanity provides an innovative, user-friendly platform that connects donors, social workers, and people in need — ensuring surplus resources are efficiently redistributed to rural communities.
+Wall of Humanity provides an innovative, user-friendly platform that connects donors, social workers, and people in need ensuring surplus resources are efficiently redistributed to rural communities.
 
 ## <a id="our-target-sdg-goals"></a> Our Target SDG Goals 🎯
 <div style="display: flex; justify-content: space-between; align-items: center;">
